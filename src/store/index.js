@@ -1,23 +1,33 @@
+
 import { createStore } from 'vuex'
 
 export default createStore({
   state: {
     id:"",
     token:"",
+    machineId:"",
   },
   mutations: {
-    setIdAndGuilt (state,id,token) {
+    addIdToken (state,id,token) {
       state.id = id;
       state.token = token;
-      
+    },
+    addMachineId(state,machineId){
+      state.machineId = machineId;
     }
   },
   actions: {
-    increment (context,id,token) {
+    setIdToken (context,id,token) {
       console.log(id)
       return new Promise((resolve,reject)=>{
 
-        context.commit('setIdAndGuilt',id,token)
+        context.commit('addIdToken',id,token)
+        resolve()
+      })
+    },
+    setMachineId(context,machineId){
+      return new Promise((resolve,reject)=>{
+        context.commit('addMachineId',machineId);
         resolve()
       })
     }

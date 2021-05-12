@@ -1,7 +1,7 @@
 const axios = require('axios');
 const hostAddress = "http://localhost:3000/api/";
 
-const login=async(email,password)=>{
+const login=async(email,password,MachineId)=>{
     var id;
     var token;
     var emailError;
@@ -11,11 +11,16 @@ const login=async(email,password)=>{
 
         axios.post(hostAddress+'user/login', {
             email: email,
-            password: password
-          })
+            password: password,
+          },{
+            headers: {
+            'Machine-Id': MachineId
+            }
+          }
+          )
           .then(function (response) {
             id = response.data.id;
-            token = response.data.token;
+            token = response.data['X-Access-Token'];
             const idtoken = {
                 id:id,
                 token:token

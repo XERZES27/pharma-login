@@ -1,7 +1,9 @@
 const axios = require('axios');
+import {v4 as uuidv4} from 'uuid';
 import {login} from '../../repository/authRepository'
 import {useStore} from 'vuex';
-import { ref, watch } from "vue";
+import { ref, watch,onMounted } from "vue";
+import {setCookie,getCookie} from '../../repository/cookieRepository'
 
 function validateEmail(email) {
   const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -48,6 +50,28 @@ const formValidation = () => {
   const emailError = ref("");
   const passwordError = ref("");
   const termsAndConditionsError = ref("");
+  var machineId;
+
+  onMounted(() => {
+    
+    
+    machineId = getCookie("machineId")
+    console.log(machineId)
+    // machineId = localStorage.getItem("machineId");
+    if(!machineId){
+      machineId = uuidv4();   
+    }
+    try {
+      setCookie("machineId", machineId,{"samesite":"strict"})
+      // localStorage.setItem("machineId", machineId);
+      store.dispatch("setMachineId",machineId);
+    } catch (error) {
+      console.log(error)
+      alert("Please enable local storage")
+    }
+    
+    
+  })
 
   watch(email, () => {
     emailError.value = "";
@@ -62,10 +86,10 @@ const formValidation = () => {
     const emailHasError = getEmailError(email);
     const passwordHasError = getPasswordError(password);
     if (!emailHasError && !passwordHasError && termsAndConditions.value) {
-      login(email.value,password.value)
+      login(email.value,password.value,machineId)
       .then((idtoken)=> {
         if(idtoken['id']&&idtoken['token']){
-          store.dispatch("increment",idtoken['id'],idtoken['token'])
+          store.dispatch("setIdToken",idtoken['id'],idtoken['token'])
           //forward to new page
         }
       })
