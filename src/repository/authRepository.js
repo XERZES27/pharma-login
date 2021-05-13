@@ -1,4 +1,5 @@
 const axios = require('axios');
+import {errorMiddleWare} from './errorMiddlewareRepository'
 const hostAddress = "http://localhost:3000/api/";
 
 const login=async(email,password,MachineId)=>{
@@ -27,8 +28,12 @@ const login=async(email,password,MachineId)=>{
             }
             resolve(idtoken)
           })
-          .catch(function (error) {
-            
+          .catch( (error) =>{
+            if(errorMiddleWare(error)){
+              
+                resolve();
+                return
+            }
             console.log(error.message)
             if(error.response.data.status=="Invalid Password"){
                 passwordError = error.response.data.status;

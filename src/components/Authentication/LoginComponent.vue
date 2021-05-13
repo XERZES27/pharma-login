@@ -32,6 +32,12 @@
 import { onBeforeMount, onMounted } from 'vue';
 import {formValidation} from '../../composables/Authentication/Auth.js'
 export default {
+  beforeCreate () {
+    document.querySelector('body').setAttribute('style', 'background:#a3a1a1')
+  },
+  beforeUnmount(){
+document.querySelector('body').setAttribute('style', 'background:#ffffff')
+  },
   
   setup(props){
 const {email,password,emailError,passwordError,termsAndConditions,termsAndConditionsError,submitForm} = formValidation()

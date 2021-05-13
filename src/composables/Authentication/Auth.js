@@ -90,7 +90,10 @@ const formValidation = () => {
       .then((idtoken)=> {
         if(idtoken['id']&&idtoken['token']){
           store.dispatch("setIdToken",idtoken['id'],idtoken['token'])
-          //forward to new page
+          // TODO forward to new page
+          // TODO create setup profile page
+          // TODO integrate google maps
+          
         }
       })
       .catch( (errorData) =>{
@@ -101,7 +104,7 @@ const formValidation = () => {
           passwordError.value = errorData['passwordError'];
         }
         else{
-          emailError.value = "Unknown Error, Please Try Again";
+          emailError.value =  "Unknown Error, Please Try Again";
         }
       }); 
       return
