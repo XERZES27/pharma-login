@@ -1,82 +1,98 @@
 <template>
-    <div class="whole">
-        
-   
-  <form @submit.prevent="submitForm" novalidate>
-    <label>Email: </label>
-    <input type="email" required v-model="email" />
-    <div v-if="emailError.lenght!=0" class="error">{{emailError}}</div>
-    <label>Password: </label>
-    <div class="passwordeye">
-    <input type="password" ref="refshowpassword" required v-model="password" />
-     <span class="showpassword"  @click="togglePassword">show password</span>
-    </div>
-   
-    <div v-if="passwordError.lenght!=0" class="error">{{passwordError}}</div>
-    <div class="term">
-      <input type="checkbox" name="" id="" required v-model="termsAndConditions" />
-      <label>Accept terms and condition</label>
-      <div v-if="termsAndConditionsError.lenght!=0" class="error">{{termsAndConditionsError}}</div>
-    </div>
+  <div class="whole">
+    <form @submit.prevent="submitForm" novalidate>
+      <label>Email: </label>
+      <input type="email" required v-model="email" />
+      <div v-if="emailError.lenght != 0" class="error">{{ emailError }}</div>
+      <label>Password: </label>
+      <div class="passwordeye">
+        <input
+          type="password"
+          ref="refshowpassword"
+          required
+          v-model="password"
+        />
+        <span class="showpassword" @click="togglePassword">show password</span>
+      </div>
 
-    <div class="submit">
-      <button class="submitButton">
-      <span >Login</span>
-    </button>
-    </div>
-  </form>
- </div>
+      <div v-if="passwordError.lenght != 0" class="error">
+        {{ passwordError }}
+      </div>
+      <div class="term">
+        <input
+          type="checkbox"
+          name=""
+          id=""
+          required
+          v-model="termsAndConditions"
+        />
+        <label>Accept terms and condition</label>
+        <div v-if="termsAndConditionsError.lenght != 0" class="error">
+          {{ termsAndConditionsError }}
+        </div>
+      </div>
+
+      <div class="submit">
+        <button class="submitButton">
+          <span>Login</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
-import { onBeforeMount, onMounted } from 'vue';
-import {formValidation} from '../../composables/Authentication/Auth.js'
+import { onBeforeMount, onMounted } from "vue";
+import { formValidation } from "../../composables/Authentication/Auth.js";
 export default {
-  beforeCreate () {
-    document.querySelector('body').setAttribute('style', 'background:#a3a1a1')
+  beforeCreate() {
+    document.querySelector("body").setAttribute("style", "background:#a3a1a1");
   },
-  beforeUnmount(){
-document.querySelector('body').setAttribute('style', 'background:#ffffff')
+  beforeUnmount() {
+    document.querySelector("body").setAttribute("style", "background:#ffffff");
   },
-  
-  setup(props){
-const {email,password,emailError,passwordError,termsAndConditions,termsAndConditionsError,submitForm} = formValidation()
 
+  setup(props) {
+    const {
+      email,
+      password,
+      emailError,
+      passwordError,
+      termsAndConditions,
+      termsAndConditionsError,
+      submitForm,
+    } = formValidation();
 
-    
-    
-    return {email,password,emailError,passwordError,termsAndConditions,termsAndConditionsError,submitForm}
-  
-
-  },
-  data(){
     return {
-      isPasswordVisible : false
-
-
-
-    };},
-    methods: {
-      togglePassword(){
-        this.$refs.refshowpassword.type = this.$refs.refshowpassword.type=="text"?"password":"text"
-
-      }
-    }
-    
-    
-  
+      email,
+      password,
+      emailError,
+      passwordError,
+      termsAndConditions,
+      termsAndConditionsError,
+      submitForm,
+    };
+  },
+  data() {
+    return {
+      isPasswordVisible: false,
+    };
+  },
+  methods: {
+    togglePassword() {
+      this.$refs.refshowpassword.type =
+        this.$refs.refshowpassword.type == "text" ? "password" : "text";
+    },
+  },
 };
 </script>
 
-<style >
-
-
-.passwordeye span{
-  margin-top:20px;
-   font-style: italic;
-   text-decoration: underline;
-   cursor: pointer;
-
+<style>
+.passwordeye span {
+  margin-top: 20px;
+  font-style: italic;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 form {
@@ -98,7 +114,6 @@ label {
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
-  
 }
 
 input {
@@ -112,10 +127,10 @@ input {
 }
 
 input:focus {
-  outline:none;
-  box-shadow: 2px 2px 5px #B9B8B8;
+  outline: none;
+  box-shadow: 2px 2px 5px #b9b8b8;
 
- /* border-bottom: 2px solid rgb(185, 181, 181); */
+  /* border-bottom: 2px solid rgb(185, 181, 181); */
 }
 
 input[type="checkbox"] {
@@ -129,23 +144,23 @@ input[type="checkbox"] {
   margin-top: 20px;
   text-align: center;
 }
-.error{
+.error {
   color: #ff0062;
   margin-top: 10px;
   font-size: 0.8em;
   font-weight: normal;
 }
 
-.submitButton{
+.submitButton {
   display: inline;
   font-size: 0.9em;
   padding: 20px 0px 20px 0px;
   margin: 20px auto;
-   width: 100%;
+  width: 100%;
   background: dodgerblue;
   border-radius: 6px;
   box-sizing: border-box;
   border: none;
-  color:white;
+  color: white;
 }
 </style>
