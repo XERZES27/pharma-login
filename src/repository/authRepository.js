@@ -7,6 +7,7 @@ const login=async(email,password,MachineId)=>{
     var token;
     var emailError;
     var passwordError;
+    var hasProfile;
 
     const promise = new Promise((resolve,reject)=>{
 
@@ -22,11 +23,13 @@ const login=async(email,password,MachineId)=>{
           .then(function (response) {
             id = response.data.id;
             token = response.data['X-Access-Token'];
-            const idtoken = {
+            hasProfile = response.data.hasProfile;
+            const responseData = {
                 id:id,
-                token:token
+                token:token,
+                hasProfile:hasProfile
             }
-            resolve(idtoken)
+            resolve(responseData)
           })
           .catch( (error) =>{
             if(errorMiddleWare(error)){

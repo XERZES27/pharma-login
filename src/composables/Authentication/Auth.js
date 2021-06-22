@@ -62,7 +62,8 @@ const formValidation = () => {
       machineId = uuidv4();   
     }
     try {
-      setCookie("machineId", machineId,{"samesite":"strict"})
+      var maxAge = 3*30*24*60*60
+      setCookie("machineId", machineId,{"samesite":"strict","Max-Age":`${maxAge}`})
       // localStorage.setItem("machineId", machineId);
       store.dispatch("setMachineId",machineId);
     } catch (error) {
@@ -87,11 +88,18 @@ const formValidation = () => {
     const passwordHasError = getPasswordError(password);
     if (!emailHasError && !passwordHasError && termsAndConditions.value) {
       login(email.value,password.value,machineId)
-      .then((idtoken)=> {
-        if(idtoken['id']&&idtoken['token']){
-          store.dispatch("setIdToken",idtoken['id'],idtoken['token'])
-          // TODO forward to new page
+      .then((responseData)=> {
+        if(responseData['id']&&responseData['token']){
+          store.dispatch("setResponseData",responseData['id'],responseData['token'],responseData['hasProfile']).then(()=>{
+            if(!responseData['hasProfile']){
+              // TODO forward to new page
           // TODO create setup profile page
+            }
+            else{
+
+            }
+          })
+          
           // TODO integrate google maps
           
         }
