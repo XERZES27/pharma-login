@@ -1,10 +1,14 @@
 <template>
-  <h1>Create Profile</h1>
+  <ProfilComponent></ProfilComponent>
 </template>
 
 <script>
+import ProfilComponent from '../../components/profile/ProfileForm.vue'
 export default {
-
+  name: 'CreateProfile',
+  components: {
+    ProfilComponent
+  }
 }
 </script>
 
