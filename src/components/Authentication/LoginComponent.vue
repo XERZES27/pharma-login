@@ -3,7 +3,7 @@
     <form @submit.prevent="submitForm" novalidate>
       <label>Email: </label>
       <input type="email" required v-model="email" />
-      <div v-if="emailError.lenght != 0" class="error">{{ emailError }}</div>
+      <div v-if="emailError.length != 0" class="error">{{ emailError }}</div>
       <label>Password: </label>
       <div class="passwordeye">
         <input

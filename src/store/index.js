@@ -8,13 +8,15 @@ export default createStore({
     machineId:"",
     deviceIsKnown:true,
     tokenIsValid:false,
+    hasProfile:false,
   },
   mutations: {
-    addIdToken (state,id,token) {
+    addResponseData (state,id,token,hasProfile) {
       state.id = id;
       state.token = token;
       state.deviceIsKnown=true;
       state.tokenIsValid = true;
+      state.hasProfile = hasProfile;
     },
     addMachineId(state,machineId){
       state.machineId = machineId;
@@ -24,15 +26,18 @@ export default createStore({
     },
     setTokenFalse(state){
       state.tokenIsValid = false;
+    },
+    setHasProfileFalse(state){
+      state.hasProfile = false
     }
+    
 
   },
   actions: {
-    setIdToken (context,id,token) {
+    setResponseData (context,id,token,hasProfile) {
       console.log(id)
       return new Promise((resolve,reject)=>{
-
-        context.commit('addIdToken',id,token)
+        context.commit('addResponseData',id,token,hasProfile)
         resolve()
       })
     },
@@ -50,6 +55,12 @@ export default createStore({
     },
     denyToken(context){
       return new Promise((resolve,reject)=>{
+        context.commit('setHasProfileFalse');
+        resolve();
+    })
+    },
+    denyProfile(context){
+      return new Promise((resolve,reject)=>{
         context.commit('setTokenFalse');
         resolve();
     })
@@ -57,9 +68,9 @@ export default createStore({
     
   },
   getters:{
-    getIsDeviceValidAndIsTokenValid:(state)=>{
+    getPrerequisites:(state)=>{
       
-        return [state.deviceIsKnown,state.tokenIsValid]
+        return [state.deviceIsKnown,state.tokenIsValid,state.hasProfile]
     }
 
   },
