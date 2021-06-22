@@ -4,6 +4,7 @@ import {login} from '../../repository/authRepository'
 import {useStore} from 'vuex';
 import { ref, watch,onMounted } from "vue";
 import {setCookie,getCookie} from '../../repository/cookieRepository'
+import router from '../../router';
 
 function validateEmail(email) {
   const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -50,26 +51,12 @@ const formValidation = () => {
   const emailError = ref("");
   const passwordError = ref("");
   const termsAndConditionsError = ref("");
-  var machineId;
+  var machineId = getCookie("machineId");
 
   onMounted(() => {
     
     
-    machineId = getCookie("machineId")
-    console.log(machineId)
-    // machineId = localStorage.getItem("machineId");
-    if(!machineId){
-      machineId = uuidv4();   
-    }
-    try {
-      var maxAge = 3*30*24*60*60
-      setCookie("machineId", machineId,{"samesite":"strict","Max-Age":`${maxAge}`})
-      // localStorage.setItem("machineId", machineId);
-      store.dispatch("setMachineId",machineId);
-    } catch (error) {
-      console.log(error)
-      alert("Please enable local storage")
-    }
+    
     
     
   })
@@ -84,16 +71,23 @@ const formValidation = () => {
     termsAndConditionsError.value = "";
   });
   const submitForm = () => {
+
     const emailHasError = getEmailError(email);
     const passwordHasError = getPasswordError(password);
     if (!emailHasError && !passwordHasError && termsAndConditions.value) {
       login(email.value,password.value,machineId)
       .then((responseData)=> {
+
         if(responseData['id']&&responseData['token']){
-          store.dispatch("setResponseData",responseData['id'],responseData['token'],responseData['hasProfile']).then(()=>{
+          store.dispatch("setResponseData",
+          {"id":responseData['id'],
+          "token":responseData['token'],
+          "hasProfile":responseData['hasProfile']
+        }).then(()=>{
             if(!responseData['hasProfile']){
               // TODO forward to new page
           // TODO create setup profile page
+                router.replace({"name":"CreateProfile"})
             }
             else{
 

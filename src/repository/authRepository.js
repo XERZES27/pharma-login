@@ -20,13 +20,14 @@ const login=async(email,password,MachineId)=>{
       }
       )
       .then(function (response) {
+        
         id = response.data.id;
         token = response.data['X-Access-Token'];
         hasProfile = response.data.hasProfile;
         const responseData = {
-            id:id,
-            token:token,
-            hasProfile:hasProfile
+            "id":id,
+            "token":token,
+            "hasProfile":hasProfile
         }
         resolve(responseData)
       })
