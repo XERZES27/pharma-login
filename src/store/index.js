@@ -37,21 +37,21 @@ export default createStore({
         `machineId`,
         `${machineId}`
       );
-      state.machineId = sessionMachineId;
+      state.machineId = machineId;
     },
     setDeviceFalse(state) {
       const sessionDeviceIsKnown = sessionStorage.setItem(
         `deviceIsKnown`,
         `${false}`
       );
-      state.deviceIsKnown = sessionDeviceIsKnown;
+      state.deviceIsKnown = false;
     },
     setTokenFalse(state) {
       const sessionTokenIsValid = sessionStorage.setItem(
         `tokenIsValid`,
         `${false}`
       );
-      state.tokenIsValid = sessionTokenIsValid;
+      state.tokenIsValid = false;
     },
     setHasProfileFalse(state) {
       const sessionHasProfile = sessionStorage.setItem(
