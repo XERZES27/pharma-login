@@ -7,7 +7,7 @@
         :model="model"
         :rules="rules"
         ref="form"
-        @submit.native.prevent="profile"
+        @submit.prevent.native="submit"
       >
         <el-form-item prop="username">
           <el-input v-model="model.username" placeholder="Name"></el-input>
@@ -24,7 +24,6 @@
             accept="image/png, image/jpeg"
             :auto-upload="dialog"
             @change="loadImage($event)"
-            limit=3
           >
             <el-button size="small" type="primary">Click to upload</el-button>
             <template #tip>
@@ -84,7 +83,6 @@
 </template>
 
 <script>
-import VueCropper from "vue-cropperjs";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 
@@ -165,7 +163,6 @@ export default {
     };
   },
   components: {
-    VueCropper,
     Cropper,
   },
   methods: {
