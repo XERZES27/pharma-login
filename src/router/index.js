@@ -4,6 +4,7 @@ import Auth from "../views/Authentication/Auth.vue";
 import UnknownDevice from "../views/Errors/DeviceNotRecognized.vue";
 import CreateProfile from "../views/Profile/CreateProfile.vue";
 import UpdateProfile from "../views/Profile/UpdateProfile.vue";
+import CreateInventory from "../views/Inventory/CreateInventory.vue";
 import store from "../store";
 
 const routes = [
@@ -37,6 +38,12 @@ const routes = [
     name: "UpdateProfile",
     component: UpdateProfile,
   },
+  {
+    path: "/createInventory",
+    name: "CreateInventory",
+    component: CreateInventory,
+
+  }
 ];
 
 const router = createRouter({

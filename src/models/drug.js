@@ -1,4 +1,5 @@
 const validateDrugName = (name)=>{
+    
     if(name) return true
     else return false
 
@@ -16,7 +17,7 @@ const validateInStockAmount = (inStockAmount) =>{
     if(!inStockAmount) return false
     var stockAmount = Number(inStockAmount)
     if(Number.isNaN(stockAmount)) return false
-    if(Number.isInteger(stockAmount) && stockAmount>0 && stockAmount<100000)return true
+    if(stockAmount>0 && stockAmount<100000)return true
     else return false
 
 }
@@ -28,8 +29,9 @@ const validatePrescriptionRequired = (prescriptionRequired)=>{
 }
 
 const validateDrugDescription = (drugDescription)=>{
+    
     if(!drugDescription) return false
-    if(150>drugDescription.length>10) return true
+    if(150>drugDescription.length && drugDescription.length>10) return true
     else return false
 
 }
@@ -50,19 +52,23 @@ const validateCountryOfOrigin = (countryOfOrigin)=>{
 
 
 const drugModel=(row)=>{
-    return $.extend({},{
+    return {
         'name':row[0],
         'price':row[1],
         'amountInStock':row[2],
         'requiresPrescription':row[3],
         'description':row[4],
-        'brandName':row[5]??undefined,
-        'countryOfOrigin':row[6]??undefined
-    })
+        ...(row[5] !==null &&{'brandName':row[5]}),
+        ...(row[6] !==null &&{'countryOfOrigin':row[6]}),
+    }
 }
 
 
 const validateRow = (row) => {
+    // console.log(row)
+    // console.log(validateDrugName(row[0]),validatePrice(row[1]),validateInStockAmount(row[2]),
+    // validatePrescriptionRequired(row[3]),validateDrugDescription(row[4]),validateBrandName(row[5]),
+    // validateCountryOfOrigin([row[6]]))
     if(
         validateDrugName(row[0]) === true &&
         validatePrice(row[1]) === true &&
@@ -79,7 +85,7 @@ const validateRow = (row) => {
 const DrugModels=(rows) => {
     var rowsWithErros = []
     var drugModels = []
-    const gabInBetweenRows = 0
+    var gabInBetweenRows = 0
     for (let index = 1; index < rows.length; index++) {
         const row = rows[index];
         if(gabInBetweenRows >5)break
