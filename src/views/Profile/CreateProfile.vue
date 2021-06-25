@@ -3,15 +3,15 @@
 </template>
 
 <script>
-import ProfilComponent from '../../components/profile/ProfileForm.vue'
+
+import ProfilComponent from "../../components/profile/ProfileForm.vue";
 export default {
-  name: 'CreateProfile',
+  name: "CreateProfile",
   components: {
-    ProfilComponent
-  }
+    ProfilComponent,
+  },
 }
 </script>
 
 <style>
-
 </style>

@@ -51,7 +51,7 @@ router.afterEach((to, from) => {
 router.beforeEach((to, from, next) => {
   // incase of refresh
   var lastUrl = sessionStorage.getItem("lastUrl");
-  if (lastUrl == null || lastUrl != to.name) {
+  if (lastUrl === null || lastUrl != to.name) {
     sessionStorage.removeItem("lastUrl");
     if(navigationType() == 1){
       console.log("page was reloaded")
@@ -64,28 +64,28 @@ router.beforeEach((to, from, next) => {
   console.log(tokenIsValid,deviceIsKnown,hasProfile,"router")
   if (
     to.name !== "CreateProfile" &&
-    deviceIsKnown &&
-    tokenIsValid &&
+    deviceIsKnown===true &&
+    tokenIsValid===true &&
     !hasProfile
   ) {
     next({ name: "CreateProfile" });
   }
-  if (to.name === "CreateProfile" && hasProfile) {
+  if (to.name === "CreateProfile" && hasProfile===true) {
     next({ name: "UpdateProfile" });
   }
 
-  if (to.name !== "UnknownDevice" && !deviceIsKnown) {
-    console.log("b")
+  if (to.name !== "UnknownDevice" && deviceIsKnown===false) {
+    
     next({ name: "UnknownDevice" });
   }
-  if(to.name === "Auth" && tokenIsValid){
+  if(to.name === "Auth" && tokenIsValid===true){
     console.log(from.name)
     //TODO
     // navigate to home
     // next({name:from.name})
   }
-  if (to.name !== "Auth" && to.name !== "UnknownDevice" && !tokenIsValid) {
-    console.log("c")
+  if (to.name !== "Auth" && to.name !== "UnknownDevice" && tokenIsValid===false) {
+   
     next({ name: "Auth" });
   } else {
     next();

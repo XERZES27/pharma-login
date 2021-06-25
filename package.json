@@ -11,8 +11,11 @@
     "core-js": "^3.6.5",
     "postcss": "^8.3.5",
     "read-excel-file": "^5.2.2",
+    "sass-loader": "^12.1.0",
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
+    "vue-advanced-cropper": "^1.7.0",
+    "vue-cropperjs": "^5.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
   },
