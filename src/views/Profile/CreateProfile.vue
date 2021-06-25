@@ -1,13 +1,13 @@
 <template>
-  <ProfilComponent></ProfilComponent>
+  <ProfileComponent></ProfileComponent>
 </template>
 
 <script>
-import ProfilComponent from '../../components/profile/ProfileForm.vue'
+import ProfileComponent from '../../components/profile/ProfileForm.vue'
 export default {
   name: 'CreateProfile',
   components: {
-    ProfilComponent
+    ProfileComponent
   }
 }
 </script>

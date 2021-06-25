@@ -7,10 +7,10 @@
         :model="model"
         :rules="rules"
         ref="form"
-        @submit.prevent.native="submit"
+        @submit.prevent="submit"
       >
         <el-form-item prop="username">
-          <el-input v-model="model.username" placeholder="Name"></el-input>
+          <el-input placeholder="Name"></el-input>
         </el-form-item>
         <el-form-item>
           <el-upload
@@ -35,13 +35,13 @@
         </el-form-item>
         <el-form-item>
           <div class="accSwitch">
-            <el-tooltip
+            <!-- <el-tooltip
               :content="'Accept Orders: ' + acceptReq"
               placement="top"
             >
               <el-switch v-model="acceptReq" active-text="Accept Orders">
               </el-switch>
-            </el-tooltip>
+            </el-tooltip> -->
           </div>
         </el-form-item>
         <el-form-item>
