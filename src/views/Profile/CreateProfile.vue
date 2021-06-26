@@ -5,7 +5,7 @@
 <script>
 import ProfileComponent from '../../components/profile/ProfileForm.vue'
 export default {
-  name: 'CreateProfile',
+  name: "CreateProfile",
   components: {
     ProfileComponent
   }
@@ -13,5 +13,4 @@ export default {
 </script>
 
 <style>
-
 </style>

@@ -7,7 +7,7 @@
         :model="model"
         :rules="rules"
         ref="form"
-        @submit.prevent="submit"
+        @submit.prevent="profile"
       >
         <el-form-item prop="username">
           <el-input placeholder="Name"></el-input>
@@ -24,6 +24,7 @@
             accept="image/png, image/jpeg"
             :auto-upload="dialog"
             @change="loadImage($event)"
+            limit=3
           >
             <el-button size="small" type="primary">Click to upload</el-button>
             <template #tip>
