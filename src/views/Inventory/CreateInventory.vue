@@ -1,22 +1,16 @@
 <template>
-<CreateInventoryComponent>
-
-</CreateInventoryComponent>
-
-  
+  <CreateInventoryComponent> fds </CreateInventoryComponent>
 </template>
 
 <script>
-import CreateInventoryComponent from '../../components/Inventory/CreateInventoryComponent.vue'
+import CreateInventoryComponent from "../../components/Inventory/CreateInventoryComponent.vue";
 export default {
-
-name: "CreateInventory",
+  name: "CreateInventory",
   components: {
     CreateInventoryComponent,
   },
-}
+};
 </script>
 
 <style>
-
 </style>
