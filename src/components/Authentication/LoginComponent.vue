@@ -15,7 +15,7 @@
         <span class="showpassword" @click="togglePassword">show password</span>
       </div>
 
-      <div v-if="passwordError.lenght != 0" class="error">
+      <div v-if="passwordError.length != 0" class="error">
         {{ passwordError }}
       </div>
       <div class="term">
@@ -27,7 +27,7 @@
           v-model="termsAndConditions"
         />
         <label>Accept terms and condition</label>
-        <div v-if="termsAndConditionsError.lenght != 0" class="error">
+        <div v-if="termsAndConditionsError.length != 0" class="error">
           {{ termsAndConditionsError }}
         </div>
       </div>
@@ -51,6 +51,7 @@ export default {
   beforeUnmount() {
     document.querySelector("body").setAttribute("style", "background:#ffffff");
   },
+  
 
   setup(props) {
     const {

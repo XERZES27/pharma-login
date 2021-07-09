@@ -4,15 +4,12 @@
 <script>
 import { setCookie, getCookie } from "./repository/cookieRepository";
 import { useStore } from "vuex";
-import { onMounted } from "vue";
 import { v4 as uuidv4 } from "uuid";
 
 export default {
-  onMounted() {
+  mounted() {
     const store = useStore();
-    console.log("here you are");
     var machineId = getCookie("machineId");
-    console.log(machineId);
     // machineId = localStorage.getItem("machineId");
     if (!machineId) {
       machineId = uuidv4();
@@ -30,7 +27,6 @@ export default {
       alert("Please enable local storage");
     }
   },
-  setup() {},
 };
 </script>
 

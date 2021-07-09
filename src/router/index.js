@@ -5,6 +5,7 @@ import UnknownDevice from "../views/Errors/DeviceNotRecognized.vue";
 import CreateProfile from "../views/Profile/CreateProfile.vue";
 import UpdateProfile from "../views/Profile/UpdateProfile.vue";
 import CreateInventory from "../views/Inventory/CreateInventory.vue";
+import InventoryHelp from "../views/Inventory/InventoryHelp"
 import store from "../store";
 
 const routes = [
@@ -19,31 +20,40 @@ const routes = [
     // which is lazy-loaded when the route is visited.
   },
   {
-    path: "/home",
-    name: "Home",
-    component: Home,
-  },
-  {
     path: "/unknownDevice",
     name: "UnknownDevice",
     component: UnknownDevice,
   },
   {
-    path: "/createProfile",
-    name: "CreateProfile",
-    component: CreateProfile,
+    path: "/home",
+    name: "Home",
+    component: Home,
+    children:[
+      {
+        path: "/createProfile",
+        name: "CreateProfile",
+        component: CreateProfile,
+      },
+      {
+        path: "/updateProfile",
+        name: "UpdateProfile",
+        component: UpdateProfile,
+      },
+      {
+        path: "/createInventory",
+        name: "CreateInventory",
+        component: CreateInventory,
+    
+      },
+      {
+        path: "/inventoryHelp",
+        name: "InventoryHelp",
+        component: InventoryHelp
+      }
+    ]
   },
-  {
-    path: "/updateProfile",
-    name: "UpdateProfile",
-    component: UpdateProfile,
-  },
-  {
-    path: "/createInventory",
-    name: "CreateInventory",
-    component: CreateInventory,
-
-  }
+  
+  
 ];
 
 const router = createRouter({
@@ -58,7 +68,7 @@ router.afterEach((to, from) => {
 router.beforeEach((to, from, next) => {
   // incase of refresh
   var lastUrl = sessionStorage.getItem("lastUrl");
-  if (lastUrl === null || lastUrl != to.name) {
+  if (lastUrl === to.name) {
     sessionStorage.removeItem("lastUrl");
     if(navigationType() == 1){
       console.log("page was reloaded")

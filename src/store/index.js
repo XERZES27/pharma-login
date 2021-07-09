@@ -10,7 +10,7 @@ export default createStore({
     hasProfile: sessionStorage.getItem(`hasProfile`) || false,
   },
   mutations: {
-    addResponseData(state, {id, token, hasProfile}) {
+    addResponseData(state, {id, token, hasProfile,machineId}) {
       sessionStorage.setItem(`id`, `${id}`);
       sessionStorage.setItem(`token`, `${token}`);
       sessionStorage.setItem(
@@ -25,12 +25,12 @@ export default createStore({
         `hasProfile`,
         `${hasProfile}`
       );
-      console.log(id,token,hasProfile,"fhhhhhhhhhhhak")
       state.id = id;
       state.token = token;
       state.deviceIsKnown = true;
       state.tokenIsValid = true;
       state.hasProfile = hasProfile;
+      state.machineId = machineId
     },
     addMachineId(state, machineId) {
       const sessionMachineId = sessionStorage.setItem(
@@ -62,10 +62,11 @@ export default createStore({
     },
   },
   actions: {
-    setResponseData(context, {id, token, hasProfile}) {
+    setResponseData(context, {id, token, hasProfile,machineId}) {
+      // console.log(token)
       return new Promise((resolve, reject) => {
-        context.commit("addResponseData", {"id":id, "token":token, "hasProfile":hasProfile});
-        // console.log(id,token,hasProfile,"her ove")
+        context.commit("addResponseData", {"id":id, "token":token, "hasProfile":hasProfile,"machineId":machineId});
+        
         resolve();
       });
     },
@@ -99,6 +100,17 @@ export default createStore({
       
       return [state.tokenIsValid,state.deviceIsKnown,state.hasProfile];
     },
+    getMachineId:(state)=>{
+      return state.machineId
+    },
+    getHeader:(state)=>{
+        return {
+            'id':state.id,
+            'X-Access-Token':state.token,
+            'Machine-Id':state.machineId
+          }
+        
+    }
   },
   modules: {},
 });

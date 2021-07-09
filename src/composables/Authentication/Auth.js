@@ -82,14 +82,17 @@ const formValidation = () => {
           store.dispatch("setResponseData",
           {"id":responseData['id'],
           "token":responseData['token'],
-          "hasProfile":responseData['hasProfile']
+          "hasProfile":responseData['hasProfile'],
+          "machineId":machineId
         }).then(()=>{
             if(!responseData['hasProfile']){
               // TODO forward to new page
           // TODO create setup profile page
+          
                 router.replace({"name":"CreateProfile"})
             }
             else{
+              router.replace({"name":"CreateInventory"})
 
             }
           })

@@ -1,5 +1,5 @@
 <template>
-  <CreateInventoryComponent> fds </CreateInventoryComponent>
+  <CreateInventoryComponent>  </CreateInventoryComponent>
 </template>
 
 <script>
