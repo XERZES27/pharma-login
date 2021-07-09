@@ -1,93 +1,105 @@
 <template>
-  <div class="profile">
-    <el-card class="box-card">
-      <h2>Profile</h2>
-      <el-form
-        class="profile-form"
-        :model="model"
-        :rules="rules"
-        ref="form"
-        @submit.prevent="profile"
-      >
-        <el-form-item prop="username">
-          <el-input placeholder="Name"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-upload
-            class="upload-demo"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :file-list="fileList"
-            :before-upload="loadImage"
-            list-type="picture"
-            accept="image/png, image/jpeg"
-            :auto-upload="dialog"
-            @change="loadImage($event)"
-            limit=3
+  <div class="container-lg align-items-center">
+    <div class="pb-3 pt-5">
+      <div class="form">
+        <div class="row justify-content-center align-items-center">
+          <div
+            class="
+              col-md-6
+              justify-space-around
+              border
+              rounded-3
+              p-3
+              shadow
+              bg-light
+              pb-5
+              align-middle
+            "
           >
-            <el-button size="small" type="primary">Click to upload</el-button>
-            <template #tip>
-              <div class="el-upload__tip">
-                jpg/png files with a size less than 500kb
-              </div>
-            </template>
-          </el-upload>
-        </el-form-item>
-        <el-form-item>
-          <div class="accSwitch">
-            <!-- <el-tooltip
-              :content="'Accept Orders: ' + acceptReq"
-              placement="top"
-            >
-              <el-switch v-model="acceptReq" active-text="Accept Orders">
-              </el-switch>
-            </el-tooltip> -->
+            <div class="text-center text-muted">
+              <h2 class="display-5">Create Profile</h2>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-addon1">@</span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Username"
+                aria-label="Username"
+                aria-describedby="basic-addon1"
+              />
+            </div>
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="flexSwitchCheckChecked"
+                checked
+              />
+              <label class="form-check-label" for="flexSwitchCheckChecked"
+                >Checked switch checkbox input</label
+              >
+            </div>
+            <input
+              class="form-control"
+              type="file"
+              id="formFile"
+              @change="loadImage"
+            />
           </div>
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            :loading="loading"
-            class="profile-button"
-            type="primary"
-            native-type="submit"
-            block
-            >Submit</el-button
-          >
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-dialog
-      title="Crop Image"
-      v-model="showModal"
-      :show-close="dialog"
-      :close-on-press-escape="dialog"
-      :close-on-click-modal="dialog"
+        </div>
+      </div>
+      <img :src="croppedImage">
+    </div>
+    <button type="button" class="btn btn-primary" @click="modalToggle">
+      My Modal
+    </button>
+    <div
+      ref="modal"
+      class="modal fade"
+      :class="{ show: active, 'd-block': active }"
+      tabindex="-1"
+      role="dialog"
     >
-      <cropper
-        ref="cropper"
-        check-orientation
-        :src="image.src"
-        :stencil-props="{
-          aspectRatio: 10 / 12,
-        }"
-      />
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="reset">Cancel</el-button>
-          <el-button type="primary" @click="crop">Confirm</el-button>
-        </span>
-      </template>
-    </el-dialog>
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-dismiss="modal"
+              aria-label="Close"
+              @click="modalToggle"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <cropper
+              ref="cropper"
+              check-orientation
+              :src="image.src"
+              :stencil-props="{
+                aspectRatio: 10 / 12,
+              }"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" @click="crop">Crop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="active" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
 <script>
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
+import { ref } from "vue";
+import { Modal } from "bootstrap";
 
-// This function is used to detect the actual image type,
 function getMimeType(file, fallback = null) {
   const byteArray = new Uint8Array(file).subarray(0, 4);
   let header = "";
@@ -111,85 +123,78 @@ function getMimeType(file, fallback = null) {
 }
 
 export default {
-  name: "profile",
-  props: {
-    value: {},
-    pk: { default: "image_key" },
-    dialogMaxWidth: { default: "600px" },
-    dialogMaxHeight: { default: "0.8vh" },
-    maxWidth: { default: 1920 },
-    maxHeight: { default: 1200 },
-    // the URL of the blob image
-    objectUrl: { default: "" },
-  },
-  data() {
-    return {
-      image: {
-        src: null,
-        type: null,
-      },
-      cropImg: null,
-      dialog: false,
-      acceptReq: true,
-      showModal: false,
-      fileList: [
-        {
-          name: "food.jpeg",
-          url:
-            "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-      ],
-      validCredentials: {
-        username: "lightscope",
-        password: "lightscope",
-      },
-      model: {
-        username: "",
-      },
-      loading: false,
-      rules: {
-        username: [
-          {
-            required: true,
-            message: "Username is required",
-            trigger: "blur",
-          },
-          {
-            min: 4,
-            message: "Username length should be at least 5 characters",
-            trigger: "blur",
-          },
-        ],
-      },
-    };
-  },
   components: {
     Cropper,
   },
-  methods: {
-    crop() {
-      const { canvas } = this.$refs.cropper.getResult();
+  setup() {
+    const croppedImage = ref(null);
+    const cropper = ref(null);
+    const active = ref(false);
+    const image = ref({
+      src: null,
+      type: null,
+    });
+    const dialog = ref(false);
+    const acceptReq = ref(true);
+    const showModal = ref(false);
+    const fileList = ref([
+      {
+        name: "food.jpeg",
+        url: "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
+      },
+    ]);
+    const model = ref({
+      username: "",
+    });
+    const loading = ref(false);
+    const rules = {
+      username: [
+        {
+          required: true,
+          message: "Username is required",
+          trigger: "blur",
+        },
+        {
+          min: 4,
+          message: "Username length should be at least 5 characters",
+          trigger: "blur",
+        },
+      ],
+    };
+
+    const crop = () => {
+      const { canvas } = cropper.value.getResult();
       // canvas.toBlob((blob) => {
       //   saveAs(blob);
       // }, this.image.type);
       // const { canvas } = this.$refs.cropper.getResult();
-      const newTab = window.open();
-      newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}"></img>`;
-    },
-    loadImage(event) {
+      croppedImage.value = canvas.toDataURL();
+      
+    };
+
+    const modalToggle = () => {
+      const body = document.querySelector("body");
+      active.value = !active.value;
+      active
+        ? body.classList.add("modal-open")
+        : body.classList.remove("modal-open");
+    };
+
+    const loadImage = (event) => {
       console.log(event);
-      this.showModal = true;
+      modalToggle();
+      showModal.value = true;
       // Reference to the DOM input element
-      const files = event.raw;
-      console.log(event.url);
+      const files = event.target.files;
+      console.log(files);
       // Ensure that you have a file before attempting to read it
       if (files) {
         // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-        if (this.image.src) {
-          URL.revokeObjectURL(this.image.src);
+        if (image.src) {
+          URL.revokeObjectURL(image.src);
         }
         // 2. Create the blob link to the file to optimize performance:
-        const blob = event.url;
+        //const blob = event.url;
         // 3. The steps below are designated to determine a file mime type to use it during the
         // getting of a cropped image from the canvas. You can replace it them by the following string,
         // but the type will be derived from the extension and it can lead to an incorrect result:
@@ -201,150 +206,97 @@ export default {
         // Create a new FileReader to read this image binary data
         const reader = new FileReader();
         // Define a callback function to run, when FileReader finishes its job
-        reader.onload = (e) => {
-          console.log(files);
+        reader.onload = () => {
+          const result = reader.result;
+          // console.log(result);
           // Note: arrow function used here, so that "this.image" refers to the image of Vue component
-          this.image = {
+          image.value = {
             // Read image as base64 and set it as src:
-            src: blob,
+            src: result,
             // Determine the image type to preserve it during the extracting the image from canvas:
-            type: getMimeType(e.target.result, files.type),
+            type: files[0].type, //getMimeType(e.target.result, files.type),
           };
         };
         // Start the reader job - read file as a data url (base64 format)
-        reader.readAsDataURL(files);
+        reader.readAsDataURL(files[0]);
       }
-    },
-    reset() {
-      this.showModal = false;
-      this.image = {
+    };
+
+    const reset = () => {
+      showModal = false;
+      image = {
         src: null,
         type: null,
       };
-    },
+    };
 
-    beforeImageAccept(file) {
+    const beforeImageAccept = (file) => {
       const isSized = file.size / 1024 / 1024 < 2;
       if (!isSized) {
-        this.$message.error("Image size can not exceed 2MB!");
+        $message.error("Image size can not exceed 2MB!");
       }
 
       return isSized;
-    },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
+    };
 
-    simulateSubmit() {
+    const handleRemove = (file, fileList) => {
+      console.log(file, fileList);
+    };
+
+    const handlePreview = (file) => {
+      console.log(file);
+    };
+
+    const simulateSubmit = () => {
       return new Promise((resolve) => {
         setTimeout(resolve, 800);
       });
-    },
-    async submit() {
-      let valid = await this.$refs.form.validate();
+    };
+
+    const submit = async () => {
+      let valid = await $refs.form.validate();
       if (!valid) {
         return;
       }
-      this.loading = true;
-      await this.simulateSubmit();
-      this.loading = false;
+      loading = true;
+      await simulateSubmit();
+      loading = false;
       if (
-        this.model.username === this.validCredentials.username &&
-        this.model.password === this.validCredentials.password
+        model.username === validCredentials.username &&
+        model.password === validCredentials.password
       ) {
-        this.$message.success("Submit successfull");
+        $message.success("Submit successfull");
       } else {
-        this.$message.error("Username or password is invalid");
+        $message.error("Username or password is invalid");
       }
-    },
-  },
-  unmounted() {
-    // Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-    if (this.image.src) {
-      URL.revokeObjectURL(this.image.src);
-    }
+    };
+
+    return {
+      image,
+      dialog,
+      acceptReq,
+      showModal,
+      fileList,
+      model,
+      loading,
+      rules,
+      crop,
+      loadImage,
+      reset,
+      handleRemove,
+      handlePreview,
+      submit,
+      active,
+      modalToggle,
+      cropper,
+      croppedImage,
+    };
   },
 };
 </script>
 
 <style scoped>
-
-.box-card {
-  width: 600px;
-}
-
-.accSwitch{
-  display: flex;
-}
-
-.profile {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.profile-button {
-  width: 100%;
-  margin-top: 40px;
-}
-.profile-form {
-  width: 290px;
-}
-</style>
-
-<style lang="scss">
-$teal: rgb(0, 124, 137);
-.el-button--primary {
-  background: $teal;
-  border-color: $teal;
-
-  &:hover,
-  &.active,
-  &:focus {
-    background: lighten($teal, 7);
-    border-color: lighten($teal, 7);
-  }
-}
-.profile .el-input__inner:hover {
-  border-color: $teal;
-}
-.profile .el-input__prefix {
-  background: rgb(238, 237, 234);
-  left: 0;
-  height: calc(100% - 2px);
-  left: 1px;
-  top: 1px;
-  border-radius: 3px;
-  .el-input__icon {
-    width: 30px;
-  }
-}
-.profile .el-card {
-  padding-top: 0;
-  padding-bottom: 30px;
-}
-h2 {
-  font-family: "Open Sans";
-  letter-spacing: 1px;
-  font-family: Roboto, sans-serif;
-  padding-bottom: 20px;
-}
-a {
-  color: $teal;
-  text-decoration: none;
-  &:hover,
-  &:active,
-  &:focus {
-    color: lighten($teal, 7);
-  }
-}
-.profile .el-card {
-  width: 340px;
-  display: flex;
-  justify-content: center;
+.container-lg {
+  height: 100vh;
 }
 </style>
