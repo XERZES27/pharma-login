@@ -46,14 +46,30 @@
               id="formFile"
               @change="loadImage"
             />
+            <div v-if="imagesList" class="row gx-1 pt-3 justify-content-around">
+              <div v-for="(img, index) in imagesList" class="col-md-4" :key="index">
+                <div class="image-area">
+                  <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
+                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
+                </div>
+              </div>
+              <!-- <div class="col-md-4">
+                <div class="image-area">
+                  <img class="img-fluid img-thumbnail rounded w-100" :src="croppedImage" alt="iamge">
+                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="image-area">
+                  <img class="img-fluid img-thumbnail rounded w-100" :src="croppedImage" alt="iamge">
+                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
+                </div>
+              </div> -->
+            </div>
           </div>
         </div>
       </div>
-      <img :src="croppedImage">
     </div>
-    <button type="button" class="btn btn-primary" @click="modalToggle">
-      My Modal
-    </button>
     <div
       ref="modal"
       class="modal fade"
@@ -61,7 +77,7 @@
       tabindex="-1"
       role="dialog"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Modal title</h5>
@@ -79,7 +95,7 @@
               check-orientation
               :src="image.src"
               :stencil-props="{
-                aspectRatio: 10 / 12,
+                aspectRatio: 16 / 9,
               }"
             />
           </div>
@@ -100,28 +116,6 @@ import "vue-advanced-cropper/dist/style.css";
 import { ref } from "vue";
 import { Modal } from "bootstrap";
 
-function getMimeType(file, fallback = null) {
-  const byteArray = new Uint8Array(file).subarray(0, 4);
-  let header = "";
-  for (let i = 0; i < byteArray.length; i++) {
-    header += byteArray[i].toString(16);
-  }
-  switch (header) {
-    case "89504e47":
-      return "image/png";
-    case "47494638":
-      return "image/gif";
-    case "ffd8ffe0":
-    case "ffd8ffe1":
-    case "ffd8ffe2":
-    case "ffd8ffe3":
-    case "ffd8ffe8":
-      return "image/jpeg";
-    default:
-      return fallback;
-  }
-}
-
 export default {
   components: {
     Cropper,
@@ -133,16 +127,12 @@ export default {
     const image = ref({
       src: null,
       type: null,
+      name: null,
     });
     const dialog = ref(false);
     const acceptReq = ref(true);
     const showModal = ref(false);
-    const fileList = ref([
-      {
-        name: "food.jpeg",
-        url: "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-      },
-    ]);
+    const imagesList = ref([]);
     const model = ref({
       username: "",
     });
@@ -164,12 +154,13 @@ export default {
 
     const crop = () => {
       const { canvas } = cropper.value.getResult();
-      // canvas.toBlob((blob) => {
-      //   saveAs(blob);
-      // }, this.image.type);
-      // const { canvas } = this.$refs.cropper.getResult();
       croppedImage.value = canvas.toDataURL();
-      
+      imagesList.value.push({
+        name: image.value.name,
+        type: image.value.type,
+        src: canvas.toDataURL(),
+      });
+      console.log(imagesList.size);
     };
 
     const modalToggle = () => {
@@ -181,7 +172,6 @@ export default {
     };
 
     const loadImage = (event) => {
-      console.log(event);
       modalToggle();
       showModal.value = true;
       // Reference to the DOM input element
@@ -194,31 +184,13 @@ export default {
           URL.revokeObjectURL(image.src);
         }
         // 2. Create the blob link to the file to optimize performance:
-        //const blob = event.url;
-        // 3. The steps below are designated to determine a file mime type to use it during the
-        // getting of a cropped image from the canvas. You can replace it them by the following string,
-        // but the type will be derived from the extension and it can lead to an incorrect result:
-        //
-        // this.image = {
-        //    src: blob;
-        //    type: files[0].type
-        // }
-        // Create a new FileReader to read this image binary data
-        const reader = new FileReader();
-        // Define a callback function to run, when FileReader finishes its job
-        reader.onload = () => {
-          const result = reader.result;
-          // console.log(result);
-          // Note: arrow function used here, so that "this.image" refers to the image of Vue component
-          image.value = {
-            // Read image as base64 and set it as src:
-            src: result,
-            // Determine the image type to preserve it during the extracting the image from canvas:
-            type: files[0].type, //getMimeType(e.target.result, files.type),
-          };
+        const blob = URL.createObjectURL(files[0]);
+        
+        image.value = {
+          src: blob,
+          type: files[0].type,
+          name: files[0].name
         };
-        // Start the reader job - read file as a data url (base64 format)
-        reader.readAsDataURL(files[0]);
       }
     };
 
@@ -239,8 +211,8 @@ export default {
       return isSized;
     };
 
-    const handleRemove = (file, fileList) => {
-      console.log(file, fileList);
+    const handleRemove = (file, imagesList) => {
+      console.log(file, imagesList);
     };
 
     const handlePreview = (file) => {
@@ -276,7 +248,7 @@ export default {
       dialog,
       acceptReq,
       showModal,
-      fileList,
+      imagesList,
       model,
       loading,
       rules,
@@ -298,5 +270,38 @@ export default {
 <style scoped>
 .container-lg {
   height: 100vh;
+}
+
+.image-area {
+  position: relative;
+  background: #333;
+}
+.remove-image {
+display: none;
+position: absolute;
+top: -5px;
+right: -5px;
+border-radius: 5em;
+padding: 2px 6px 3px;
+text-decoration: none;
+font: 700 21px/20px sans-serif;
+background: #555;
+border: 3px solid #fff;
+color: #FFF;
+box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  -webkit-transition: background 0.5s;
+  transition: background 0.5s;
+}
+.remove-image:hover {
+ background: #E54E4E;
+  padding: 3px 7px 5px;
+  top: -6px;
+right: -6px;
+}
+.remove-image:active {
+ background: #E54E4E;
+  top: -5px;
+right: -6px;
 }
 </style>
