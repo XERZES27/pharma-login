@@ -50,7 +50,7 @@
               <div v-for="(img, index) in imagesList" class="col-md-4" :key="index">
                 <div class="image-area">
                   <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
-                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
+                  <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
                 </div>
               </div>
               <!-- <div class="col-md-4">
@@ -66,9 +66,14 @@
                 </div>
               </div> -->
             </div>
+            <div class="d-grid">
+              <button class="btn btn-success" type="button" @click="modalToggle">Choose location</button>
+            </div>
           </div>
         </div>
       </div>
+      Latitude: {{ currPos.lat.toFixed(2)}}, Longitude: {{ currPos.lng.toFixed(2)}}
+      
     </div>
     <div
       ref="modal"
@@ -106,15 +111,48 @@
         </div>
       </div>
     </div>
+    <div
+      ref="mapModal"
+      class="modal fade"
+      :class="{ show: active, 'd-block': active }"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-dismiss="mapModal"
+              aria-label="Close"
+              @click="modalToggle"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div ref="mapDiv" style="width: 100%; height: 60vh"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal">Cancel</button>
+            <button type="button" class="btn btn-primary">Crop</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div v-if="active" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
 <script>
+/* eslint-disable no-undef */
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
-import { ref } from "vue";
-import { Modal } from "bootstrap";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useGeolocation } from '@/composables/Profile/useGeolocation.js'
+import { Loader } from '@googlemaps/js-api-loader';
+
+const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
 
 export default {
   components: {
@@ -151,6 +189,73 @@ export default {
         },
       ],
     };
+    const mapDiv = ref(null);
+
+    const { coords } = useGeolocation();
+    const currPos = computed(() => ({
+      lat: coords.value.latitude,
+      lng: coords.value.longitude
+    }));
+
+    const loader = new Loader({
+      apiKey: GOOGLE_MAPS_API_KEY,
+    });
+
+    // google.maps.event.addListener(mapDiv, 'click', (event) => {
+    //   addMarker(event.latLng)
+    // });
+    const marker = ref(null)
+
+    const addMarker = (coords) => {
+      if(marker.value !== null) deleteMarker()
+      marker.value = new google.maps.Marker({
+        position: coords,
+        map: map.value,
+        icon: imageicn.value,
+        title: 'aman'
+      })
+    }
+
+    const deleteMarker = () => {
+      marker.value = null
+      marker.value.setMap(null);
+    }
+    
+
+    let map = ref(null);
+    let clickListener = null;
+    const otherPos = ref(null);
+    var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+    const imageicn = ref(null);
+
+    onMounted(async () => {
+      await loader.load()
+      map.value = new google.maps.Map(mapDiv.value, {
+        center: currPos.value,
+        zoom: 16
+      })
+      clickListener = map.value.addListener(
+        'click',
+        ({ latLng: { lat, lng } }) => {
+          otherPos.value = { lat: lat(), lng: lng() }
+          console.log(otherPos.value);
+          addMarker(otherPos.value);
+        }
+      )
+      imageicn.value = {
+        url: "https://resizeimage.net/mypic/7PhQINvh6ofWTAKc/8x4Fv/pngegg--4-.png",
+        // This marker is 20 pixels wide by 32 pixels high.
+        size: new google.maps.Size(33, 37),
+        // The origin for this image is (0, 0).
+        origin: new google.maps.Point(0, 0),
+        // The anchor for this image is the base of the flagpole at (0, 32).
+        anchor: new google.maps.Point(0, 32),
+      };
+    });
+
+    onUnmounted(async () => {
+      if (clickListener) clickListener.remove()
+    })
 
     const crop = () => {
       const { canvas } = cropper.value.getResult();
@@ -211,8 +316,9 @@ export default {
       return isSized;
     };
 
-    const handleRemove = (file, imagesList) => {
-      console.log(file, imagesList);
+    const handleRemove = (place) => {
+      imagesList.value.splice(place, 1);
+      //console.log("Removed from list: ",imagesList.value.length);
     };
 
     const handlePreview = (file) => {
@@ -262,6 +368,8 @@ export default {
       modalToggle,
       cropper,
       croppedImage,
+      currPos,
+      mapDiv,
     };
   },
 };
