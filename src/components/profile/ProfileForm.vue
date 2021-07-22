@@ -29,7 +29,7 @@
                 aria-describedby="basic-addon1"
               />
             </div>
-            <div class="form-check form-switch">
+            <div class="form-check form-switch mb-3">
               <input
                 class="form-check-input"
                 type="checkbox"
@@ -37,37 +37,30 @@
                 checked
               />
               <label class="form-check-label" for="flexSwitchCheckChecked"
-                >Checked switch checkbox input</label
+                >Accept Request</label
               >
             </div>
             <input
-              class="form-control"
+              class="form-control mb-3"
               type="file"
               id="formFile"
               @change="loadImage"
             />
-            <div v-if="imagesList" class="row gx-1 pt-3 justify-content-around">
+            <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
               <div v-for="(img, index) in imagesList" class="col-md-4" :key="index">
                 <div class="image-area">
                   <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
                   <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
                 </div>
               </div>
-              <!-- <div class="col-md-4">
-                <div class="image-area">
-                  <img class="img-fluid img-thumbnail rounded w-100" :src="croppedImage" alt="iamge">
-                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="image-area">
-                  <img class="img-fluid img-thumbnail rounded w-100" :src="croppedImage" alt="iamge">
-                  <span class="remove-image" style="display: inline; cursor: pointer;">&#215;</span>
-                </div>
-              </div> -->
             </div>
-            <div class="d-grid">
-              <button class="btn btn-success" type="button" @click="modalToggle">Choose location</button>
+            <div class="form-group mb-3">
+              <label for="locationTextarea">Loction in words</label>
+              <textarea class="form-control" id="locationTextarea" rows="3" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
+            </div>
+            <p v-if="location" class="fst-italic">Location 📍 : {{location.latitude}}, {{location.longitude}}</p>
+            <div class="d-grid mb-3">
+              <button class="btn btn-success" type="button" @click="mapToggle">Choose location</button>
             </div>
           </div>
         </div>
@@ -105,7 +98,7 @@
             />
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="modalToggle" >Cancel</button>
             <button type="button" class="btn btn-primary" @click="crop">Crop</button>
           </div>
         </div>
@@ -114,7 +107,7 @@
     <div
       ref="mapModal"
       class="modal fade"
-      :class="{ show: active, 'd-block': active }"
+      :class="{ show: activeMap, 'd-block': activeMap }"
       tabindex="-1"
       role="dialog"
     >
@@ -127,15 +120,15 @@
               class="btn-close"
               data-dismiss="mapModal"
               aria-label="Close"
-              @click="modalToggle"
+              @click="mapToggle"
             ></button>
           </div>
           <div class="modal-body">
             <div ref="mapDiv" style="width: 100%; height: 60vh"></div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal">Cancel</button>
-            <button type="button" class="btn btn-primary">Crop</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal" @click="mapToggle">Cancel</button>
+            <button type="button" class="btn btn-primary" @click="mapToggle">DONE!</button>
           </div>
         </div>
       </div>
@@ -153,6 +146,7 @@ import { useGeolocation } from '@/composables/Profile/useGeolocation.js'
 import { Loader } from '@googlemaps/js-api-loader';
 
 const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
+let markers = [];
 
 export default {
   components: {
@@ -162,6 +156,7 @@ export default {
     const croppedImage = ref(null);
     const cropper = ref(null);
     const active = ref(false);
+    const activeMap = ref(false);
     const image = ref({
       src: null,
       type: null,
@@ -169,7 +164,7 @@ export default {
     });
     const dialog = ref(false);
     const acceptReq = ref(true);
-    const showModal = ref(false);
+    const showMap = ref(false);
     const imagesList = ref([]);
     const model = ref({
       username: "",
@@ -189,6 +184,7 @@ export default {
         },
       ],
     };
+    const location = ref(null);
     const mapDiv = ref(null);
 
     const { coords } = useGeolocation();
@@ -204,28 +200,35 @@ export default {
     // google.maps.event.addListener(mapDiv, 'click', (event) => {
     //   addMarker(event.latLng)
     // });
-    const marker = ref(null)
+    //const markers = ref([])
 
     const addMarker = (coords) => {
-      if(marker.value !== null) deleteMarker()
-      marker.value = new google.maps.Marker({
+      if(markers.length !== 0) deleteMarker()
+      const marker = new google.maps.Marker({
         position: coords,
         map: map.value,
         icon: imageicn.value,
         title: 'aman'
       })
+      markers.push(marker);
+      location.value = {
+        latitude: coords.lat,
+        longitude: coords.lng
+      }
+      console.log(location.value);
     }
 
     const deleteMarker = () => {
-      marker.value = null
-      marker.value.setMap(null);
+      for (let i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+      }
+      markers = [];
     }
     
 
     let map = ref(null);
     let clickListener = null;
     const otherPos = ref(null);
-    var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
     const imageicn = ref(null);
 
     onMounted(async () => {
@@ -243,13 +246,13 @@ export default {
         }
       )
       imageicn.value = {
-        url: "https://resizeimage.net/mypic/7PhQINvh6ofWTAKc/8x4Fv/pngegg--4-.png",
+        url: "https://i.im.ge/2021/07/21/seFIh.png",
         // This marker is 20 pixels wide by 32 pixels high.
         size: new google.maps.Size(33, 37),
         // The origin for this image is (0, 0).
         origin: new google.maps.Point(0, 0),
-        // The anchor for this image is the base of the flagpole at (0, 32).
-        anchor: new google.maps.Point(0, 32),
+        // The anchor for this image is the base of the flagpole at (0, 37).
+        anchor: new google.maps.Point(16, 40),
       };
     });
 
@@ -265,7 +268,7 @@ export default {
         type: image.value.type,
         src: canvas.toDataURL(),
       });
-      console.log(imagesList.size);
+      modalToggle();
     };
 
     const modalToggle = () => {
@@ -276,9 +279,17 @@ export default {
         : body.classList.remove("modal-open");
     };
 
+    const mapToggle = () => {
+      const body = document.querySelector("body");
+      activeMap.value = !activeMap.value;
+      active
+        ? body.classList.add("modal-open")
+        : body.classList.remove("modal-open");
+    };
+
     const loadImage = (event) => {
       modalToggle();
-      showModal.value = true;
+      showMap.value = true;
       // Reference to the DOM input element
       const files = event.target.files;
       console.log(files);
@@ -300,7 +311,7 @@ export default {
     };
 
     const reset = () => {
-      showModal = false;
+      showMap = false;
       image = {
         src: null,
         type: null,
@@ -318,7 +329,6 @@ export default {
 
     const handleRemove = (place) => {
       imagesList.value.splice(place, 1);
-      //console.log("Removed from list: ",imagesList.value.length);
     };
 
     const handlePreview = (file) => {
@@ -353,7 +363,7 @@ export default {
       image,
       dialog,
       acceptReq,
-      showModal,
+      showMap,
       imagesList,
       model,
       loading,
@@ -365,11 +375,15 @@ export default {
       handlePreview,
       submit,
       active,
+      activeMap,
       modalToggle,
+      mapToggle,
       cropper,
       croppedImage,
       currPos,
       mapDiv,
+      deleteMarker,
+      location
     };
   },
 };
