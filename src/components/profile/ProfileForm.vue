@@ -1,33 +1,30 @@
 <template>
-  <div class="container-lg align-items-center">
+  <div class="main-container container-fluid align-items-center">
     <div class="pb-3 pt-5">
       <div class="form">
         <div class="row justify-content-center align-items-center">
           <div
             class="
-              col-md-6
+              col-md-8
+              col-lg-6
+              col-xl-5
+              col-sm-9
+              col-11
               justify-space-around
               border
               rounded-3
               p-3
               shadow
               bg-light
-              pb-5
               align-middle
             "
           >
             <div class="text-center text-muted">
               <h2 class="display-5">Create Profile</h2>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text" id="basic-addon1">@</span>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Username"
-                aria-label="Username"
-                aria-describedby="basic-addon1"
-              />
+            <div class="form-group mb-3">
+              <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
+              <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" aria-label="Username" aria-describedby="basic-addon1"/>
             </div>
             <div class="form-check form-switch mb-3">
               <input
@@ -47,7 +44,7 @@
               @change="loadImage"
             />
             <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
-              <div v-for="(img, index) in imagesList" class="col-md-4" :key="index">
+              <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
                 <div class="image-area">
                   <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
                   <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
@@ -55,17 +52,16 @@
               </div>
             </div>
             <div class="form-group mb-3">
-              <label for="locationTextarea">Loction in words</label>
+              <label class="text-muted" for="locationTextarea">Loction in words</label>
               <textarea class="form-control" id="locationTextarea" rows="3" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
             </div>
-            <p v-if="location" class="fst-italic">Location 📍 : {{location.latitude}}, {{location.longitude}}</p>
+            <p v-if="location">Location 📍 : <span class="text-success fst-italic fw-bolder">{{location.latitude}}, {{location.longitude}}</span></p>
             <div class="d-grid mb-3">
               <button class="btn btn-success" type="button" @click="mapToggle">Choose location</button>
             </div>
           </div>
         </div>
       </div>
-      Latitude: {{ currPos.lat.toFixed(2)}}, Longitude: {{ currPos.lng.toFixed(2)}}
       
     </div>
     <div
@@ -128,7 +124,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal" @click="mapToggle">Cancel</button>
-            <button type="button" class="btn btn-primary" @click="mapToggle">DONE!</button>
+            <button type="button" class="btn btn-success" @click="mapToggle">DONE!</button>
           </div>
         </div>
       </div>
@@ -390,8 +386,9 @@ export default {
 </script>
 
 <style scoped>
-.container-lg {
+.main-container {
   height: 100vh;
+  background-color: rgb(185, 185, 185);
 }
 
 .image-area {
