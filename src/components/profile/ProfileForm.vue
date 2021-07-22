@@ -1,350 +1,447 @@
 <template>
-  <div class="profile">
-    <el-card class="box-card">
-      <h2>Profile</h2>
-      <el-form
-        class="profile-form"
-        :model="model"
-        :rules="rules"
-        ref="form"
-        @submit.prevent="profile"
-      >
-        <el-form-item prop="username">
-          <el-input placeholder="Name"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-upload
-            class="upload-demo"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :file-list="fileList"
-            :before-upload="loadImage"
-            list-type="picture"
-            accept="image/png, image/jpeg"
-            :auto-upload="dialog"
-            @change="loadImage($event)"
-            limit=3
-          >
-            <el-button size="small" type="primary">Click to upload</el-button>
-            <template #tip>
-              <div class="el-upload__tip">
-                jpg/png files with a size less than 500kb
-              </div>
-            </template>
-          </el-upload>
-        </el-form-item>
-        <el-form-item>
-          <div class="accSwitch">
-            <!-- <el-tooltip
-              :content="'Accept Orders: ' + acceptReq"
-              placement="top"
-            >
-              <el-switch v-model="acceptReq" active-text="Accept Orders">
-              </el-switch>
-            </el-tooltip> -->
+  <div class="main-container container-fluid d-flex align-items-center">
+    <div class="form container">
+      <div class="row justify-content-center align-items-center">
+        <div
+          class="
+            col-md-8
+            col-lg-6
+            col-xl-5
+            col-sm-10
+            col-11
+            justify-space-around
+            border
+            rounded-3
+            p-3
+            shadow
+            bg-light
+            align-middle
+          "
+        >
+          <div class="text-center text-muted">
+            <h2 class="display-5">Create Profile</h2>
           </div>
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            :loading="loading"
-            class="profile-button"
-            type="primary"
-            native-type="submit"
-            block
-            >Submit</el-button
-          >
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-dialog
-      title="Crop Image"
-      v-model="showModal"
-      :show-close="dialog"
-      :close-on-press-escape="dialog"
-      :close-on-click-modal="dialog"
+          <div class="form-group mb-3">
+            <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
+            <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" aria-label="Username" aria-describedby="basic-addon1"/>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="flexSwitchCheckChecked"
+              checked
+            />
+            <label class="form-check-label" for="flexSwitchCheckChecked"
+              >Accept Request</label
+            >
+          </div>
+          <div class="form-group mb-3">
+            <label class="text-muted" for="formFile">Choose images of the Pharmacy(max: 3 images)</label>
+            <input
+              class="form-control"
+              type="file"
+              id="formFile"
+              @change="loadImage"
+            />
+          </div>
+          <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
+            <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
+              <div class="image-area">
+                <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
+                <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group mb-3">
+            <label class="text-muted" for="locationTextarea">Loction in words</label>
+            <textarea class="form-control" id="locationTextarea" rows="3" style="resize: none;" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
+          </div>
+          <p>Location 📍 : <span v-if="!location" class="text-muted fw-lighter">Please choose the location of the Pharmacy</span>
+            <span v-if="location" class="text-success fst-italic fw-bolder">
+              {{location.latitude}}, {{location.longitude}}
+            </span>
+          </p>
+          <div class="d-grid mb-3">
+            <button class="btn btn-success" type="button" @click="mapToggle">Choose Pharmacy location</button>
+          </div>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-info text-light btn-labeled">
+                  <span class="btn-label">✓︁ </span>Create
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+      <div ref="toastDiv" id="liveToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Please select an image lessthan 2MB.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+    <div
+      ref="modal"
+      class="modal fade"
+      :class="{ show: active, 'd-block': active }"
+      tabindex="-1"
+      role="dialog"
     >
-      <cropper
-        ref="cropper"
-        check-orientation
-        :src="image.src"
-        :stencil-props="{
-          aspectRatio: 10 / 12,
-        }"
-      />
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="reset">Cancel</el-button>
-          <el-button type="primary" @click="crop">Confirm</el-button>
-        </span>
-      </template>
-    </el-dialog>
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-dismiss="modal"
+              aria-label="Close"
+              @click="modalToggle"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <cropper
+              ref="cropper"
+              check-orientation
+              :src="image.src"
+              :stencil-props="{
+                aspectRatio: 16 / 9,
+              }"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="modalToggle" >Cancel</button>
+            <button type="button" class="btn btn-primary" @click="crop">Crop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      ref="mapModal"
+      class="modal fade"
+      :class="{ show: activeMap, 'd-block': activeMap }"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-dismiss="mapModal"
+              aria-label="Close"
+              @click="mapToggle"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div ref="mapDiv" style="width: 100%; height: 60vh"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal" @click="mapToggle">Cancel</button>
+            <button type="button" class="btn btn-success" @click="mapToggle">DONE!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="active" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
 <script>
+/* eslint-disable no-undef */
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useGeolocation } from '@/composables/Profile/useGeolocation.js'
+import { Loader } from '@googlemaps/js-api-loader';
+import { Toast } from 'bootstrap'
 
-// This function is used to detect the actual image type,
-function getMimeType(file, fallback = null) {
-  const byteArray = new Uint8Array(file).subarray(0, 4);
-  let header = "";
-  for (let i = 0; i < byteArray.length; i++) {
-    header += byteArray[i].toString(16);
-  }
-  switch (header) {
-    case "89504e47":
-      return "image/png";
-    case "47494638":
-      return "image/gif";
-    case "ffd8ffe0":
-    case "ffd8ffe1":
-    case "ffd8ffe2":
-    case "ffd8ffe3":
-    case "ffd8ffe8":
-      return "image/jpeg";
-    default:
-      return fallback;
-  }
-}
+const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
+let markers = [];
 
 export default {
-  name: "profile",
-  props: {
-    value: {},
-    pk: { default: "image_key" },
-    dialogMaxWidth: { default: "600px" },
-    dialogMaxHeight: { default: "0.8vh" },
-    maxWidth: { default: 1920 },
-    maxHeight: { default: 1200 },
-    // the URL of the blob image
-    objectUrl: { default: "" },
-  },
-  data() {
-    return {
-      image: {
-        src: null,
-        type: null,
-      },
-      cropImg: null,
-      dialog: false,
-      acceptReq: true,
-      showModal: false,
-      fileList: [
-        {
-          name: "food.jpeg",
-          url:
-            "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-      ],
-      validCredentials: {
-        username: "lightscope",
-        password: "lightscope",
-      },
-      model: {
-        username: "",
-      },
-      loading: false,
-      rules: {
-        username: [
-          {
-            required: true,
-            message: "Username is required",
-            trigger: "blur",
-          },
-          {
-            min: 4,
-            message: "Username length should be at least 5 characters",
-            trigger: "blur",
-          },
-        ],
-      },
-    };
-  },
   components: {
     Cropper,
   },
-  methods: {
-    crop() {
-      const { canvas } = this.$refs.cropper.getResult();
-      // canvas.toBlob((blob) => {
-      //   saveAs(blob);
-      // }, this.image.type);
-      // const { canvas } = this.$refs.cropper.getResult();
-      const newTab = window.open();
-      newTab.document.body.innerHTML = `<img src="${canvas.toDataURL()}"></img>`;
-    },
-    loadImage(event) {
-      console.log(event);
-      this.showModal = true;
-      // Reference to the DOM input element
-      const files = event.raw;
-      console.log(event.url);
-      // Ensure that you have a file before attempting to read it
-      if (files) {
-        // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-        if (this.image.src) {
-          URL.revokeObjectURL(this.image.src);
-        }
-        // 2. Create the blob link to the file to optimize performance:
-        const blob = event.url;
-        // 3. The steps below are designated to determine a file mime type to use it during the
-        // getting of a cropped image from the canvas. You can replace it them by the following string,
-        // but the type will be derived from the extension and it can lead to an incorrect result:
-        //
-        // this.image = {
-        //    src: blob;
-        //    type: files[0].type
-        // }
-        // Create a new FileReader to read this image binary data
-        const reader = new FileReader();
-        // Define a callback function to run, when FileReader finishes its job
-        reader.onload = (e) => {
-          console.log(files);
-          // Note: arrow function used here, so that "this.image" refers to the image of Vue component
-          this.image = {
-            // Read image as base64 and set it as src:
-            src: blob,
-            // Determine the image type to preserve it during the extracting the image from canvas:
-            type: getMimeType(e.target.result, files.type),
-          };
-        };
-        // Start the reader job - read file as a data url (base64 format)
-        reader.readAsDataURL(files);
-      }
-    },
-    reset() {
-      this.showModal = false;
-      this.image = {
-        src: null,
-        type: null,
-      };
-    },
+  setup() {
+    const croppedImage = ref(null);
+    const cropper = ref(null);
+    const toastDiv = ref(null);
+    const active = ref(false);
+    const activeMap = ref(false);
+    const image = ref({
+      src: null,
+      type: null,
+      name: null,
+    });
+    const dialog = ref(false);
+    const acceptReq = ref(true);
+    const showMap = ref(false);
+    const imagesList = ref([]);
+    const model = ref({
+      username: "",
+    });
+    const loading = ref(false);
+    const rules = {
+      username: [
+        {
+          required: true,
+          message: "Username is required",
+          trigger: "blur",
+        },
+        {
+          min: 4,
+          message: "Username length should be at least 5 characters",
+          trigger: "blur",
+        },
+      ],
+    };
+    const location = ref(null);
+    const mapDiv = ref(null);
 
-    beforeImageAccept(file) {
+    const { coords } = useGeolocation();
+    const currPos = computed(() => ({
+      lat: coords.value.latitude,
+      lng: coords.value.longitude
+    }));
+
+    const loader = new Loader({
+      apiKey: GOOGLE_MAPS_API_KEY,
+    });
+
+    // google.maps.event.addListener(mapDiv, 'click', (event) => {
+    //   addMarker(event.latLng)
+    // });
+    //const markers = ref([])
+
+    const showToast = () => {
+      var toast = new Toast(toastDiv.value)
+      toast.show()
+    }
+
+    const addMarker = (coords) => {
+      if(markers.length !== 0) deleteMarker()
+      const marker = new google.maps.Marker({
+        position: coords,
+        map: map.value,
+        icon: imageicn.value,
+        title: 'aman'
+      })
+      markers.push(marker);
+      location.value = {
+        latitude: coords.lat,
+        longitude: coords.lng
+      }
+      console.log(location.value);
+    }
+
+    const deleteMarker = () => {
+      for (let i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+      }
+      markers = [];
+    }
+    
+
+    let map = ref(null);
+    let clickListener = null;
+    const otherPos = ref(null);
+    const imageicn = ref(null);
+
+    onMounted(async () => {
+      await loader.load()
+      map.value = new google.maps.Map(mapDiv.value, {
+        center: currPos.value,
+        zoom: 16
+      })
+      clickListener = map.value.addListener(
+        'click',
+        ({ latLng: { lat, lng } }) => {
+          otherPos.value = { lat: lat(), lng: lng() }
+          console.log(otherPos.value);
+          addMarker(otherPos.value);
+        }
+      )
+      imageicn.value = {
+        url: "https://i.im.ge/2021/07/21/seFIh.png",
+        // This marker is 20 pixels wide by 32 pixels high.
+        size: new google.maps.Size(33, 37),
+        // The origin for this image is (0, 0).
+        origin: new google.maps.Point(0, 0),
+        // The anchor for this image is the base of the flagpole at (0, 37).
+        anchor: new google.maps.Point(16, 40),
+      };
+    });
+
+    onUnmounted(async () => {
+      if (clickListener) clickListener.remove()
+    })
+
+    const crop = () => {
+      const { canvas } = cropper.value.getResult();
+      croppedImage.value = canvas.toDataURL();
+      imagesList.value.push({
+        name: image.value.name,
+        type: image.value.type,
+        src: canvas.toDataURL(),
+      });
+      modalToggle();
+    };
+
+    const modalToggle = () => {
+      const body = document.querySelector("body");
+      active.value = !active.value;
+      active
+        ? body.classList.add("modal-open")
+        : body.classList.remove("modal-open");
+    };
+
+    const mapToggle = () => {
+      const body = document.querySelector("body");
+      activeMap.value = !activeMap.value;
+      active
+        ? body.classList.add("modal-open")
+        : body.classList.remove("modal-open");
+    };
+
+    const loadImage = (event) => {
+      // Reference to the DOM input element
+      const files = event.target.files;
+      if (beforeImageAccept(files[0])) {
+        console.log(files);
+        modalToggle();
+        showMap.value = true;
+        // Ensure that you have a file before attempting to read it
+        if (files) {
+          // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
+          if (image.src) {
+            URL.revokeObjectURL(image.src);
+          }
+          // 2. Create the blob link to the file to optimize performance:
+          const blob = URL.createObjectURL(files[0]);
+          
+          image.value = {
+            src: blob,
+            type: files[0].type,
+            name: files[0].name
+          };
+        }
+      }
+    };
+
+    const beforeImageAccept = (file) => {
       const isSized = file.size / 1024 / 1024 < 2;
       if (!isSized) {
-        this.$message.error("Image size can not exceed 2MB!");
+        showToast();
       }
 
       return isSized;
-    },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
+    };
 
-    simulateSubmit() {
+    const handleRemove = (place) => {
+      imagesList.value.splice(place, 1);
+    };
+
+    const handlePreview = (file) => {
+      console.log(file);
+    };
+
+    const simulateSubmit = () => {
       return new Promise((resolve) => {
         setTimeout(resolve, 800);
       });
-    },
-    async submit() {
-      let valid = await this.$refs.form.validate();
+    };
+
+    const submit = async () => {
+      let valid = await $refs.form.validate();
       if (!valid) {
         return;
       }
-      this.loading = true;
-      await this.simulateSubmit();
-      this.loading = false;
+      loading = true;
+      await simulateSubmit();
+      loading = false;
       if (
-        this.model.username === this.validCredentials.username &&
-        this.model.password === this.validCredentials.password
+        model.username === validCredentials.username &&
+        model.password === validCredentials.password
       ) {
-        this.$message.success("Submit successfull");
+        $message.success("Submit successfull");
       } else {
-        this.$message.error("Username or password is invalid");
+        $message.error("Username or password is invalid");
       }
-    },
-  },
-  unmounted() {
-    // Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-    if (this.image.src) {
-      URL.revokeObjectURL(this.image.src);
-    }
+    };
+
+    return {
+      image,
+      dialog,
+      acceptReq,
+      showMap,
+      imagesList,
+      model,
+      loading,
+      rules,
+      crop,
+      loadImage,
+      handleRemove,
+      handlePreview,
+      submit,
+      active,
+      activeMap,
+      modalToggle,
+      mapToggle,
+      cropper,
+      croppedImage,
+      currPos,
+      mapDiv,
+      toastDiv,
+      deleteMarker,
+      location,
+      showToast
+    };
   },
 };
 </script>
 
 <style scoped>
-
-.box-card {
-  width: 600px;
+.main-container {
+  height: 100vh;
+  background-color: rgb(185, 185, 185);
 }
 
-.accSwitch{
-  display: flex;
+.image-area {
+  position: relative;
+  background: #333;
 }
-
-.profile {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.remove-image {
+display: none;
+position: absolute;
+top: -5px;
+right: -5px;
+border-radius: 5em;
+padding: 2px 6px 3px;
+text-decoration: none;
+font: 700 21px/20px sans-serif;
+background: #555;
+border: 3px solid #fff;
+color: #FFF;
+box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  -webkit-transition: background 0.5s;
+  transition: background 0.5s;
 }
-
-.profile-button {
-  width: 100%;
-  margin-top: 40px;
+.remove-image:hover {
+ background: #E54E4E;
+  padding: 3px 7px 5px;
+  top: -6px;
+right: -6px;
 }
-.profile-form {
-  width: 290px;
-}
-</style>
-
-<style lang="scss">
-$teal: rgb(0, 124, 137);
-.el-button--primary {
-  background: $teal;
-  border-color: $teal;
-
-  &:hover,
-  &.active,
-  &:focus {
-    background: lighten($teal, 7);
-    border-color: lighten($teal, 7);
-  }
-}
-.profile .el-input__inner:hover {
-  border-color: $teal;
-}
-.profile .el-input__prefix {
-  background: rgb(238, 237, 234);
-  left: 0;
-  height: calc(100% - 2px);
-  left: 1px;
-  top: 1px;
-  border-radius: 3px;
-  .el-input__icon {
-    width: 30px;
-  }
-}
-.profile .el-card {
-  padding-top: 0;
-  padding-bottom: 30px;
-}
-h2 {
-  font-family: "Open Sans";
-  letter-spacing: 1px;
-  font-family: Roboto, sans-serif;
-  padding-bottom: 20px;
-}
-a {
-  color: $teal;
-  text-decoration: none;
-  &:hover,
-  &:active,
-  &:focus {
-    color: lighten($teal, 7);
-  }
-}
-.profile .el-card {
-  width: 340px;
-  display: flex;
-  justify-content: center;
+.remove-image:active {
+ background: #E54E4E;
+  top: -5px;
+right: -6px;
 }
 </style>
