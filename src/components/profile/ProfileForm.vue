@@ -1,68 +1,65 @@
 <template>
-  <div class="main-container container-fluid align-items-center">
-    <div class="pb-3 pt-5">
-      <div class="form">
-        <div class="row justify-content-center align-items-center">
-          <div
-            class="
-              col-md-8
-              col-lg-6
-              col-xl-5
-              col-sm-9
-              col-11
-              justify-space-around
-              border
-              rounded-3
-              p-3
-              shadow
-              bg-light
-              align-middle
-            "
-          >
-            <div class="text-center text-muted">
-              <h2 class="display-5">Create Profile</h2>
-            </div>
-            <div class="form-group mb-3">
-              <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
-              <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" aria-label="Username" aria-describedby="basic-addon1"/>
-            </div>
-            <div class="form-check form-switch mb-3">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="flexSwitchCheckChecked"
-                checked
-              />
-              <label class="form-check-label" for="flexSwitchCheckChecked"
-                >Accept Request</label
-              >
-            </div>
+  <div class="main-container container-fluid d-flex align-items-center">
+    <div class="form container">
+      <div class="row justify-content-center align-items-center">
+        <div
+          class="
+            col-md-8
+            col-lg-6
+            col-xl-5
+            col-sm-10
+            col-11
+            justify-space-around
+            border
+            rounded-3
+            p-3
+            shadow
+            bg-light
+            align-middle
+          "
+        >
+          <div class="text-center text-muted">
+            <h2 class="display-5">Create Profile</h2>
+          </div>
+          <div class="form-group mb-3">
+            <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
+            <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" aria-label="Username" aria-describedby="basic-addon1"/>
+          </div>
+          <div class="form-check form-switch mb-3">
             <input
-              class="form-control mb-3"
-              type="file"
-              id="formFile"
-              @change="loadImage"
+              class="form-check-input"
+              type="checkbox"
+              id="flexSwitchCheckChecked"
+              checked
             />
-            <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
-              <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
-                <div class="image-area">
-                  <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
-                  <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
-                </div>
+            <label class="form-check-label" for="flexSwitchCheckChecked"
+              >Accept Request</label
+            >
+          </div>
+          <input
+            class="form-control mb-3"
+            type="file"
+            id="formFile"
+            @change="loadImage"
+          />
+          <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
+            <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
+              <div class="image-area">
+                <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
+                <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
               </div>
             </div>
-            <div class="form-group mb-3">
-              <label class="text-muted" for="locationTextarea">Loction in words</label>
-              <textarea class="form-control" id="locationTextarea" rows="3" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
-            </div>
-            <p v-if="location">Location 📍 : <span class="text-success fst-italic fw-bolder">{{location.latitude}}, {{location.longitude}}</span></p>
-            <div class="d-grid mb-3">
-              <button class="btn btn-success" type="button" @click="mapToggle">Choose location</button>
-            </div>
+          </div>
+          <div class="form-group mb-3">
+            <label class="text-muted" for="locationTextarea">Loction in words</label>
+            <textarea class="form-control" id="locationTextarea" rows="3" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
+          </div>
+          <p v-if="location">Location 📍 : <span class="text-success fst-italic fw-bolder">{{location.latitude}}, {{location.longitude}}</span></p>
+          <div class="d-grid mb-3">
+            <button class="btn btn-success" type="button" @click="mapToggle">Choose location</button>
           </div>
         </div>
       </div>
-      
     </div>
     <div
       ref="modal"
