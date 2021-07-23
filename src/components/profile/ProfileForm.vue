@@ -36,12 +36,15 @@
               >Accept Request</label
             >
           </div>
-          <input
-            class="form-control mb-3"
-            type="file"
-            id="formFile"
-            @change="loadImage"
-          />
+          <div class="form-group mb-3">
+            <label class="text-muted" for="formFile">Choose images of the Pharmacy(max: 3 images)</label>
+            <input
+              class="form-control"
+              type="file"
+              id="formFile"
+              @change="loadImage"
+            />
+          </div>
           <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
             <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
               <div class="image-area">
@@ -52,12 +55,31 @@
           </div>
           <div class="form-group mb-3">
             <label class="text-muted" for="locationTextarea">Loction in words</label>
-            <textarea class="form-control" id="locationTextarea" rows="3" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
+            <textarea class="form-control" id="locationTextarea" rows="3" style="resize: none;" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
           </div>
-          <p v-if="location">Location 📍 : <span class="text-success fst-italic fw-bolder">{{location.latitude}}, {{location.longitude}}</span></p>
+          <p>Location 📍 : <span v-if="!location" class="text-muted fw-lighter">Please choose the location of the Pharmacy</span>
+            <span v-if="location" class="text-success fst-italic fw-bolder">
+              {{location.latitude}}, {{location.longitude}}
+            </span>
+          </p>
           <div class="d-grid mb-3">
-            <button class="btn btn-success" type="button" @click="mapToggle">Choose location</button>
+            <button class="btn btn-success" type="button" @click="mapToggle">Choose Pharmacy location</button>
           </div>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-info text-light btn-labeled">
+                  <span class="btn-label">✓︁ </span>Create
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+      <div ref="toastDiv" id="liveToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Please select an image lessthan 2MB.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
       </div>
     </div>
@@ -137,6 +159,7 @@ import "vue-advanced-cropper/dist/style.css";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useGeolocation } from '@/composables/Profile/useGeolocation.js'
 import { Loader } from '@googlemaps/js-api-loader';
+import { Toast } from 'bootstrap'
 
 const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
 let markers = [];
@@ -148,6 +171,7 @@ export default {
   setup() {
     const croppedImage = ref(null);
     const cropper = ref(null);
+    const toastDiv = ref(null);
     const active = ref(false);
     const activeMap = ref(false);
     const image = ref({
@@ -194,6 +218,11 @@ export default {
     //   addMarker(event.latLng)
     // });
     //const markers = ref([])
+
+    const showToast = () => {
+      var toast = new Toast(toastDiv.value)
+      toast.show()
+    }
 
     const addMarker = (coords) => {
       if(markers.length !== 0) deleteMarker()
@@ -281,40 +310,34 @@ export default {
     };
 
     const loadImage = (event) => {
-      modalToggle();
-      showMap.value = true;
       // Reference to the DOM input element
       const files = event.target.files;
-      console.log(files);
-      // Ensure that you have a file before attempting to read it
-      if (files) {
-        // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-        if (image.src) {
-          URL.revokeObjectURL(image.src);
+      if (beforeImageAccept(files[0])) {
+        console.log(files);
+        modalToggle();
+        showMap.value = true;
+        // Ensure that you have a file before attempting to read it
+        if (files) {
+          // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
+          if (image.src) {
+            URL.revokeObjectURL(image.src);
+          }
+          // 2. Create the blob link to the file to optimize performance:
+          const blob = URL.createObjectURL(files[0]);
+          
+          image.value = {
+            src: blob,
+            type: files[0].type,
+            name: files[0].name
+          };
         }
-        // 2. Create the blob link to the file to optimize performance:
-        const blob = URL.createObjectURL(files[0]);
-        
-        image.value = {
-          src: blob,
-          type: files[0].type,
-          name: files[0].name
-        };
       }
-    };
-
-    const reset = () => {
-      showMap = false;
-      image = {
-        src: null,
-        type: null,
-      };
     };
 
     const beforeImageAccept = (file) => {
       const isSized = file.size / 1024 / 1024 < 2;
       if (!isSized) {
-        $message.error("Image size can not exceed 2MB!");
+        showToast();
       }
 
       return isSized;
@@ -363,7 +386,6 @@ export default {
       rules,
       crop,
       loadImage,
-      reset,
       handleRemove,
       handlePreview,
       submit,
@@ -375,8 +397,10 @@ export default {
       croppedImage,
       currPos,
       mapDiv,
+      toastDiv,
       deleteMarker,
-      location
+      location,
+      showToast
     };
   },
 };

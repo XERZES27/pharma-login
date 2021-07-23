@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.12.1",
+    "@popperjs/core": "^2.9.2",
     "axios": "^0.21.1",
     "bootstrap": "^5.0.2",
     "core-js": "^3.6.5",
-    "element-plus": "^1.0.2-beta.53",
     "postcss": "^8.3.5",
     "read-excel-file": "^5.2.2",
     "uuid": "^8.3.2",
