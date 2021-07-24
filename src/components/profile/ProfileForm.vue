@@ -1,7 +1,7 @@
 <template>
   <div class="main-container container-fluid d-flex align-items-center">
-    <div class="form container">
-      <div class="row justify-content-center align-items-center">
+    <div class="container">
+      <form class="form row justify-content-center align-items-center needs-validation" novalidate>
         <div
           class="
             col-md-8
@@ -23,8 +23,11 @@
           </div>
           <div class="form-group mb-3">
             <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
-            <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" aria-label="Username" aria-describedby="basic-addon1"/>
+            <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" required/>
           </div>
+          <span class="invalid-feedback" v-if="showValidation">
+
+          </span>
           <div class="form-check form-switch mb-3">
             <input
               class="form-check-input"
@@ -43,6 +46,7 @@
               type="file"
               id="formFile"
               @change="loadImage"
+              required
             />
           </div>
           <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
@@ -55,9 +59,9 @@
           </div>
           <div class="form-group mb-3">
             <label class="text-muted" for="locationTextarea">Loction in words</label>
-            <textarea class="form-control" id="locationTextarea" rows="3" style="resize: none;" placeholder="e.g. Megenana 20m below zefmesh"></textarea>
+            <textarea class="form-control" id="locationTextarea" rows="3" style="resize: none;" placeholder="e.g. Megenana 20m below zefmesh" required/>
           </div>
-          <p>Location 📍 : <span v-if="!location" class="text-muted fw-lighter">Please choose the location of the Pharmacy</span>
+          <p>Location 📍 : <span v-if="!location" class="fw-lighter" ref="locationValidation">Please choose the location of the Pharmacy</span>
             <span v-if="location" class="text-success fst-italic fw-bolder">
               {{location.latitude}}, {{location.longitude}}
             </span>
@@ -71,7 +75,7 @@
             </button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
       <div ref="toastDiv" id="liveToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -203,27 +207,77 @@ export default {
     };
     const location = ref(null);
     const mapDiv = ref(null);
+    let map = ref(null);
+    let clickListener = null;
+    let locationValidation = ref(null);
+    const otherPos = ref(null);
+    const imageicn = ref(null);
 
+    //* On mounted map is initialized with and a click listener is attached.
+    onMounted(async () => {
+      await loader.load()
+      map.value = new google.maps.Map(mapDiv.value, {
+        center: currPos.value,
+        zoom: 16
+      })
+      clickListener = map.value.addListener(
+        'click',
+        ({ latLng: { lat, lng } }) => {
+          otherPos.value = { lat: lat(), lng: lng() }
+          console.log(otherPos.value);
+          addMarker(otherPos.value);
+        }
+      )
+      //* Custom marker icon for the map.
+      imageicn.value = {
+        url: "https://i.im.ge/2021/07/21/seFIh.png",
+        // This marker is 20 pixels wide by 32 pixels high.
+        size: new google.maps.Size(33, 37),
+        // The origin for this image is (0, 0).
+        origin: new google.maps.Point(0, 0),
+        // The anchor for this image is the base of the flagpole at (0, 37).
+        anchor: new google.maps.Point(16, 40),
+      };
+
+      //* For Form Valdiation.
+      var forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+
+            form.classList.add('was-validated')
+            locationValidation.value.classList.add('text-danger');
+          }, false)
+        });
+    });
+
+    //* On unmounted the map click listner is removed
+    onUnmounted(async () => {
+      if (clickListener) clickListener.remove()
+    });
+
+    const loader = new Loader({
+      apiKey: GOOGLE_MAPS_API_KEY,
+    });
+
+    //* Get current location of the user to center his/her map
     const { coords } = useGeolocation();
     const currPos = computed(() => ({
       lat: coords.value.latitude,
       lng: coords.value.longitude
     }));
 
-    const loader = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-    });
-
-    // google.maps.event.addListener(mapDiv, 'click', (event) => {
-    //   addMarker(event.latLng)
-    // });
-    //const markers = ref([])
-
+    //* Shows error toast.
     const showToast = () => {
       var toast = new Toast(toastDiv.value)
       toast.show()
     }
 
+    //* Add marker of the pharmacy location on the map.
     const addMarker = (coords) => {
       if(markers.length !== 0) deleteMarker()
       const marker = new google.maps.Marker({
@@ -246,53 +300,8 @@ export default {
       }
       markers = [];
     }
-    
 
-    let map = ref(null);
-    let clickListener = null;
-    const otherPos = ref(null);
-    const imageicn = ref(null);
-
-    onMounted(async () => {
-      await loader.load()
-      map.value = new google.maps.Map(mapDiv.value, {
-        center: currPos.value,
-        zoom: 16
-      })
-      clickListener = map.value.addListener(
-        'click',
-        ({ latLng: { lat, lng } }) => {
-          otherPos.value = { lat: lat(), lng: lng() }
-          console.log(otherPos.value);
-          addMarker(otherPos.value);
-        }
-      )
-      imageicn.value = {
-        url: "https://i.im.ge/2021/07/21/seFIh.png",
-        // This marker is 20 pixels wide by 32 pixels high.
-        size: new google.maps.Size(33, 37),
-        // The origin for this image is (0, 0).
-        origin: new google.maps.Point(0, 0),
-        // The anchor for this image is the base of the flagpole at (0, 37).
-        anchor: new google.maps.Point(16, 40),
-      };
-    });
-
-    onUnmounted(async () => {
-      if (clickListener) clickListener.remove()
-    })
-
-    const crop = () => {
-      const { canvas } = cropper.value.getResult();
-      croppedImage.value = canvas.toDataURL();
-      imagesList.value.push({
-        name: image.value.name,
-        type: image.value.type,
-        src: canvas.toDataURL(),
-      });
-      modalToggle();
-    };
-
+    //* Toggles the crop modal.
     const modalToggle = () => {
       const body = document.querySelector("body");
       active.value = !active.value;
@@ -301,6 +310,7 @@ export default {
         : body.classList.remove("modal-open");
     };
 
+    //* Toggle the map modal.
     const mapToggle = () => {
       const body = document.querySelector("body");
       activeMap.value = !activeMap.value;
@@ -309,9 +319,10 @@ export default {
         : body.classList.remove("modal-open");
     };
 
+    //* Load the images selected and give it to the cropper modal.
     const loadImage = (event) => {
-      // Reference to the DOM input element
       const files = event.target.files;
+
       if (beforeImageAccept(files[0])) {
         console.log(files);
         modalToggle();
@@ -334,21 +345,29 @@ export default {
       }
     };
 
+    //* Check if the image size is appropriate(not too big).
     const beforeImageAccept = (file) => {
       const isSized = file.size / 1024 / 1024 < 2;
       if (!isSized) {
         showToast();
       }
-
       return isSized;
+    };
+
+    //* Crop the image and preview it.
+    const crop = () => {
+      const { canvas } = cropper.value.getResult();
+      croppedImage.value = canvas.toDataURL();
+      imagesList.value.push({
+        name: image.value.name,
+        type: image.value.type,
+        src: canvas.toDataURL(),
+      });
+      modalToggle();
     };
 
     const handleRemove = (place) => {
       imagesList.value.splice(place, 1);
-    };
-
-    const handlePreview = (file) => {
-      console.log(file);
     };
 
     const simulateSubmit = () => {
@@ -387,7 +406,6 @@ export default {
       crop,
       loadImage,
       handleRemove,
-      handlePreview,
       submit,
       active,
       activeMap,
@@ -397,6 +415,7 @@ export default {
       croppedImage,
       currPos,
       mapDiv,
+      locationValidation,
       toastDiv,
       deleteMarker,
       location,
