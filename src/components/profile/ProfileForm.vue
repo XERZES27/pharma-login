@@ -25,9 +25,6 @@
             <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
             <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" required/>
           </div>
-          <span class="invalid-feedback" v-if="showValidation">
-
-          </span>
           <div class="form-check form-switch mb-3">
             <input
               class="form-check-input"
@@ -39,15 +36,17 @@
               >Accept Request</label
             >
           </div>
-          <div class="form-group mb-3">
+          <div v-if="imagesList.length !== 3" class="form-group mb-3">
             <label class="text-muted" for="formFile">Choose images of the Pharmacy(max: 3 images)</label>
             <input
               class="form-control"
               type="file"
               id="formFile"
               @change="loadImage"
-              required
             />
+            <span v-if="showValidation && imagesList.length === 0" class="text-danger">
+              Please select an image.
+            </span>
           </div>
           <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
             <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
@@ -212,6 +211,7 @@ export default {
     let locationValidation = ref(null);
     const otherPos = ref(null);
     const imageicn = ref(null);
+    const showValidation = ref(false);
 
     //* On mounted map is initialized with and a click listener is attached.
     onMounted(async () => {
@@ -251,6 +251,7 @@ export default {
 
             form.classList.add('was-validated')
             locationValidation.value.classList.add('text-danger');
+            showValidation.value = true;
           }, false)
         });
     });
@@ -419,7 +420,8 @@ export default {
       toastDiv,
       deleteMarker,
       location,
-      showToast
+      showToast,
+      showValidation
     };
   },
 };
