@@ -1,7 +1,14 @@
 <template>
   <section id="bulk upload">
     <div class="container-lg">
-      
+      <div class="row bg-light align-items-center text-start mb-5">
+        <div
+          class="col-md-12 py-4 ps-5 display-4"
+          style="font-family: 'Times New Roman', serif"
+        >
+          Inventory Help
+        </div>
+      </div>
       <div class="row justify-content-start align-items-center">
         <div class="col-md-10 text-center text-md-start">
           <p class="text-secondary fs-1 fw-bold text-capitalize">

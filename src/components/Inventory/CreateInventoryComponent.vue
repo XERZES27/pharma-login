@@ -1,6 +1,14 @@
 <template>
   <section id="inventory">
     <div class="container-lg">
+      <div class="row bg-light align-items-center text-start mb-4">
+        <div
+          class="col-md-12 py-4 ps-5 display-4"
+          style="font-family: 'Times New Roman', serif"
+        >
+          Upload Inventory
+        </div>
+      </div>
       <div class="row justify-content-start align-items-center">
         <div class="col-md-8 text-center text-md-start">
           <p class="lead my-4 text-muted">
@@ -212,19 +220,19 @@
               </h3>
               <h3 v-if="stateOfResponse == `Complete Fail`" class="text-danger">
                 Please check that your data is not invalid, everything has
-                failed (ﾉ*ФωФ)ﾉ
+                failed
+                <p class="text-dark">¯\_(ツ)_/¯</p>
               </h3>
             </div>
             <div class="mt-5">
               <div v-if="rowsWithValidDrugModels.length != 0">
-                <h3 class="py-4 text-success"><u>Validation Errors</u></h3>
+                <h3 class="py-4 text-success"><u>Created Drugs</u></h3>
                 <p class="text-muted fs-5">
-                  The Rows below do not have validation errors.
+                  The Rows below have been uploaded to you inventory.
                 </p>
                 <table class="table table-bordered table-striped">
                   <thead>
                     <tr>
-                      <th scope="col">#</th>
                       <th scope="col">Drug Name</th>
                       <th scope="col">Price</th>
                       <th scope="col">In Stock</th>
@@ -237,15 +245,15 @@
                   <tbody class="">
                     <tr
                       v-for="(rows, index) in rowsWithValidDrugModels"
-                      :key="rows.index"
+                      :key="index"
                     >
-                      <td scope="row">{{ rows.index + 1 }}</td>
-                      <td
-                        v-for="cell  in rows.row"
-                        :key="cell + index"
-                      >
-                        {{ cell }}
-                      </td>
+                      <td scope="row">{{ rows["name"] }}</td>
+                      <td>{{ rows["price"] }}</td>
+                      <td>{{ rows["amountInStock"] }}</td>
+                      <td>{{ rows["requiresPrescription"] }}</td>
+                      <td>{{ rows["description"] }}</td>
+                      <td>{{ rows["brandName"] }}</td>
+                      <td>{{ rows["countryOfOrigin"] }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -255,8 +263,8 @@
                 <p class="text-muted fs-5">
                   The Rows below already exist on the server and cannot be
                   repeated <br />
-                  Consider changing the brand name if you want to have the
-                  different variants of a single drug
+                  Consider changing the brand name if you want to have different
+                  variants of a single drug
                 </p>
                 <table class="table table-bordered table-striped">
                   <thead>
@@ -276,16 +284,62 @@
                       v-for="(rows, index) in rowsWithRepetitionErrors"
                       :key="rows.index"
                     >
-                      <td scope="row">{{ rows.index + 1 }}</td>
+                      <td scope="row">{{ index + 1 }}</td>
                       <td
-                        v-for="(cell, ind) in rows.row"
-                        :key="cell + index"
                         :class="{
-                          'bg-danger': !rows.cellColors[ind],
-                          'text-white': !rows.cellColors[ind],
+                          'bg-danger': !rows['cellColors'][0],
+                          'text-white': !rows['cellColors'][0],
                         }"
                       >
-                        {{ cell }}
+                        {{ rows.row["name"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[1],
+                          'text-white': !rows.cellColors[1],
+                        }"
+                      >
+                        {{ rows.row["price"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[2],
+                          'text-white': !rows.cellColors[2],
+                        }"
+                      >
+                        {{ rows.row["amountInStock"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[3],
+                          'text-white': !rows.cellColors[3],
+                        }"
+                      >
+                        {{ rows.row["requiresPrescription"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[4],
+                          'text-white': !rows.cellColors[4],
+                        }"
+                      >
+                        {{ rows.row["description"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[5],
+                          'text-white': !rows.cellColors[5],
+                        }"
+                      >
+                        {{ rows.row["brandName"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[6],
+                          'text-white': !rows.cellColors[6],
+                        }"
+                      >
+                        {{ rows.row["countryOfOrigin"] }}
                       </td>
                     </tr>
                   </tbody>
@@ -316,16 +370,62 @@
                       v-for="(rows, index) in rowsWithValidationErrors"
                       :key="rows.index"
                     >
-                      <td scope="row">{{ rows.index + 1 }}</td>
+                      <td scope="row">{{ index + 1 }}</td>
                       <td
-                        v-for="(cell, ind) in rows.row"
-                        :key="cell + index"
                         :class="{
-                          'bg-danger': !rows.cellColors[ind],
-                          'text-white': !rows.cellColors[ind],
+                          'bg-danger': !rows['cellColors'][0],
+                          'text-white': !rows['cellColors'][0],
                         }"
                       >
-                        {{ cell }}
+                        {{ rows.row["name"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[1],
+                          'text-white': !rows.cellColors[1],
+                        }"
+                      >
+                        {{ rows.row["price"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[2],
+                          'text-white': !rows.cellColors[2],
+                        }"
+                      >
+                        {{ rows.row["amountInStock"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[3],
+                          'text-white': !rows.cellColors[3],
+                        }"
+                      >
+                        {{ rows.row["requiresPrescription"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[4],
+                          'text-white': !rows.cellColors[4],
+                        }"
+                      >
+                        {{ rows.row["description"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[5],
+                          'text-white': !rows.cellColors[5],
+                        }"
+                      >
+                        {{ rows.row["brandName"] }}
+                      </td>
+                      <td
+                        :class="{
+                          'bg-danger': !rows.cellColors[6],
+                          'text-white': !rows.cellColors[6],
+                        }"
+                      >
+                        {{ rows.row["countryOfOrigin"] }}
                       </td>
                     </tr>
                   </tbody>
@@ -347,7 +447,7 @@
                     stateOfResponse == `Complete Pass`
                   "
                   type="button"
-                  class="btn btn-primary btn-lg w-50 shadow-sm"
+                  class="btn btn-primary btn-lg me-3 w-50 shadow-sm"
                   @click="retryCreateInventory"
                 >
                   Upload Some More
@@ -366,7 +466,7 @@
                     stateOfResponse == `Complete Pass`
                   "
                   type="button"
-                  class="btn btn-success btn-lg w-50 shadow-sm"
+                  class="btn btn-dark btn-lg w-50 shadow-sm"
                   @click="continueToInventory"
                 >
                   Continue
@@ -487,6 +587,14 @@ export default {
     },
     retryCreateInventory() {
       // TODO reload create inventory
+      this.finalPhase = false;
+      this.initialPhase = true;
+      this.isProcessingOnClient = false;
+      this.userValidationPhase = false;
+      this.isProcessingOnServer = false;
+      this.rowsWithValidationErrors = [];
+      this.rowsWithRepetitionErrors = [];
+      this.rowsWithValidDrugModels = [];
     },
     continueToInventory() {
       // TODO forward to inventory
@@ -497,6 +605,12 @@ export default {
       unknownErrorsBody = "";
     },
     closeModal() {
+      this.userValidationPhase = false;
+      this.rowsWithValidationErrors = [];
+      this.rowsWithRepetitionErrors = [];
+      this.isProcessingOnClient = false;
+      this.isProcessingOnServer = false;
+      this.initialPhase = true;
       this.unknownErrors = false;
       unknownErrorsBody = "";
     },
@@ -506,7 +620,10 @@ export default {
       this.$refs.input.click();
     },
     cancelClientValidation() {
-      (this.userValidationPhase = false), (this.initialPhase = true);
+      this.userValidationPhase = false;
+      this.rowsWithValidationErrors = [];
+      this.rowsWithRepetitionErrors = [];
+      this.initialPhase = true;
     },
     onSelectedFile(event) {
       this.validateSelectedFile(event.target.files[0]);

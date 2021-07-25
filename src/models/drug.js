@@ -2,22 +2,25 @@ const validateDrugName = (name) => {
   if (name) return true;
   else return false;
 };
+
 const validatePrice = (price) => {
   if (!price) return false;
   var truePrice = Number(price);
   if (Number.isNaN(truePrice)) return false;
-  if (Number.isInteger(truePrice) && truePrice > 0 && truePrice < 10000000)
+  if (truePrice > 0 && truePrice < 100000) return true;
+  else return false;
+};
+
+
+const validateInStockAmount = (InStockAmount) => {
+  if (!InStockAmount) return false;
+  var stockAmount = Number(InStockAmount);
+  if (Number.isNaN(stockAmount)) return false;
+  if (Number.isInteger(stockAmount) && stockAmount > 0 && stockAmount < 10000000)
     return true;
   else return false;
 };
 
-const validateInStockAmount = (inStockAmount) => {
-  if (!inStockAmount) return false;
-  var stockAmount = Number(inStockAmount);
-  if (Number.isNaN(stockAmount)) return false;
-  if (stockAmount > 0 && stockAmount < 100000) return true;
-  else return false;
-};
 
 const validatePrescriptionRequired = (prescriptionRequired) => {
   if (prescriptionRequired === true || prescriptionRequired == false)
@@ -98,7 +101,7 @@ const DrugModels = (rows) => {
     if (gabInBetweenRows > 5) break;
     if (!row[0]) gabInBetweenRows += 1;
     if (validateRow(row) === true) {
-      var queryName = row[5] === undefined ? row[0] : row[0] + row[5];
+      var queryName = row[5] === undefined || row[5] === null ? row[0] : row[0] + row[5];
       if (uniqueRows.includes(queryName) == false) {
         uniqueRows.push(queryName);
         drugModels.push(drugModel(row));
@@ -121,4 +124,7 @@ const DrugModel = (row) => {
   }
 };
 
-module.exports = { DrugModels };
+module.exports = { DrugModels, validatePrice,
+  validateInStockAmount,
+  validatePrescriptionRequired,
+  validateCountryOfOrigin };

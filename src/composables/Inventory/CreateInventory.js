@@ -46,9 +46,10 @@ const createInventory = () => {
     rowsWithRepetitionErrors.value = []
     rowsWithValidationErrors.value = []
     bulkUpload(drugModelsAndErrors.value["drugModels"]).then((response)=>{
+      console.log(response.data)
       var validationErrors = response.data["validationErrors"]
       var repetitionErrors = response.data["repetitionErrors"]
-      console.log("validationErrors",validationErrors,"repetitionErrors",repetitionErrors)
+      // console.log("validationErrors",validationErrors,"repetitionErrors",repetitionErrors,"ValidDrugModels",response.data["drugModels"])
       
       if(response.status==="Invalid Data"){
         stateOfResponse.value = "Complete Fail"

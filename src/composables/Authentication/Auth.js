@@ -92,7 +92,7 @@ const formValidation = () => {
                 router.replace({"name":"CreateProfile"})
             }
             else{
-              router.replace({"name":"CreateInventory"})
+              router.replace({"name":"InventoryHome"})
 
             }
           })
