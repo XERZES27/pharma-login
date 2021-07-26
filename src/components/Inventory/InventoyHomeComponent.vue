@@ -1,6 +1,262 @@
 <template>
   <section id="inventoryHome">
     <div class="container-md">
+      <!-- Modal -->
+      <div
+        class="modal fade"
+        ref="modalref"
+        data-bs-backdrop="static"
+        id="exampleModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title ps-2" id="exampleModalLabel">
+                <strong>Add Drug</strong>
+              </h5>
+              <button
+              :disabled="isProcessingCreateDrugPhase"
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div v-if="initialCreateDrugPhase" class="container-md">
+                <div class="row">
+                  <p class="text-danger ps-2">
+                    <strong>{{ createDrugError }}</strong>
+                  </p>
+                </div>
+                <div class="row">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Name</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="nameModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Drug Name"
+                  />
+                  <p
+                    v-if="nameError !== ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ nameError }}</strong>
+                  </p>
+                </div>
+
+                <div class="row" :class="{ 'mt-3': nameError === '' }">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Price</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="priceModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Price"
+                  />
+                  <p
+                    v-if="priceError !== ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ priceError }}</strong>
+                  </p>
+                </div>
+                <div class="row" :class="{ 'mt-3': priceError === '' }">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Amount In Stock</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="amountInStockModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Amount In Stock"
+                  />
+                  <p
+                    v-if="amountInStockError !== ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ amountInStockError }}</strong>
+                  </p>
+                </div>
+                <div
+                  class="row mb-2"
+                  :class="{ 'mt-3': amountInStockError === '' }"
+                >
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Requries Prescription</strong></span
+                  >
+                </div>
+                <div class="row ms-2 mb-1">
+                  <input
+                    v-model="requiresPrescriptionModel"
+                    type="checkbox"
+                    id="switch"
+                  /><label for="switch">Toggle</label>
+                </div>
+                <div class="row mt-2">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Description</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="descriptionModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Description"
+                  />
+                  <p
+                    v-if="descriptionError != ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ descriptionError }}</strong>
+                  </p>
+                </div>
+                <div class="row" :class="{ 'mt-3': descriptionError === '' }">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Brand Name</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="brandNameModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Optional, Brand Name"
+                  />
+                  <p
+                    v-if="brandNameError != ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ brandNameError }}</strong>
+                  </p>
+                </div>
+                <div class="row" :class="{ 'mt-3': brandNameError === '' }">
+                  <span class="input-group-text bg-white border-0"
+                    ><strong>Country Of Origin</strong></span
+                  >
+                </div>
+                <div class="row ms-1">
+                  <input
+                    v-model="countryOfOriginModel"
+                    style="outline: none; box-shadow: none"
+                    type="text "
+                    class="
+                      form-control
+                      border-2
+                      border-top-0
+                      border-end-0
+                      border-start-0
+                      border-dark
+                      text-dark
+                    "
+                    placeholder="Optional, Country Of Origin"
+                  />
+                  <p
+                    v-if="countryOfOriginError != ''"
+                    class="d-flex justify-content-start pt-1 text-danger"
+                  >
+                    <strong>{{ countryOfOriginError }}</strong>
+                  </p>
+                </div>
+              </div>
+              <div v-if="isProcessingCreateDrugPhase" class="container-md">
+                <p class="text-info fs-4 pb-2">Please wait while we process your request ...</p>
+                <div
+                  class="spinner-border text-info"
+                  style="width: 3rem; height: 3rem"
+                  role="status"
+                >
+                
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer bg-light">
+              <button
+              :disabled="isProcessingCreateDrugPhase"
+                type="button"
+                class="btn btn-danger"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                :disabled="
+                  nameError !== '' ||
+                  priceError !== '' ||
+                  amountInStockError !== '' ||
+                  descriptionError !== '' ||
+                  brandNameError !== '' ||
+                  countryOfOriginError !== '' ||
+                  isProcessingCreateDrugPhase
+                "
+                type="button"
+                class="btn btn-dark"
+                @click="submitCreateDrug"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row bg-light align-items-center text-start mb-4">
         <div
           class="col-md-12 py-4 ps-5 display-4"
@@ -29,6 +285,8 @@
           <i
             type="button"
             id="add-button"
+            data-bs-toggle="modal"
+            data-bs-target="#exampleModal"
             class="bi bi-plus px-md-5 px-4 border mx-2"
             style="font-size: 2rem"
           ></i>
@@ -85,7 +343,11 @@
           >
             <div class="row d-flex justify-content-center pt-1">
               <div class="col-md-10">
-                <div class="card border border-top-0 border-end-0" type="button" @click="queryDrugById(recommendation['_id'])">
+                <div
+                  class="card border border-top-0 border-end-0"
+                  type="button"
+                  @click="queryDrugById(recommendation['_id'])"
+                >
                   <div class="row">
                     <div class="col">
                       <div class="card-body text-start">
@@ -107,12 +369,11 @@
           </div>
         </div>
         <div v-if="resultCameEmpty !== ''">
-          
-            <div class="row d-flex justify-content-center pt-3">
-              <div class="col-md-10">
-                <p class="fs-3">{{resultCameEmpty}}</p>
-              </div>
+          <div class="row d-flex justify-content-center pt-3">
+            <div class="col-md-10">
+              <p class="fs-3">{{ resultCameEmpty }}</p>
             </div>
+          </div>
         </div>
       </div>
       <div class="row d-flex justify-content-end mt-5">
@@ -129,11 +390,11 @@
           "
         >
           <span
-            class="fs-3 pt-4"
+            class="fs-3 d-inline pt-4"
             style="font-family: 'Times New Roman', serif"
             >Sorted {{ pickedSort }}</span
           >
-          <div class=" me-4">
+          <div class="d-inline me-4">
             <div class="d-inline me-2">
               <input
                 type="radio"
@@ -434,18 +695,40 @@
 <script>
 import { inventoryHome } from "../../composables/Inventory/InventoryHome";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { bootstrap } from "bootstrap/dist/css/bootstrap.min.css";
+import { onMounted } from "vue";
 export default {
+  mounted() {},
   methods: {
     onClickAway(event) {
       if (this.drugRecomendations.length != 0) this.drugRecomendations = [];
     },
-    createInventory(){
-      this.$router.push({name:'CreateInventory'})
-    }
+    createInventory() {
+      this.$router.push({ name: "CreateInventory" });
+    },
   },
 
   setup(props, context) {
     const {
+      initialCreateDrugPhase,
+      createDrugError,
+      isProcessingCreateDrugPhase,
+      createDrugIsSuccessfull,
+      modalref,
+      nameModel,
+      nameError,
+      priceModel,
+      priceError,
+      amountInStockModel,
+      amountInStockError,
+      requiresPrescriptionModel,
+      descriptionModel,
+      descriptionError,
+      brandNameModel,
+      brandNameError,
+      countryOfOriginModel,
+      countryOfOriginError,
+      submitCreateDrug,
       searchQuery,
       inventoryList,
       pickedSort,
@@ -462,7 +745,26 @@ export default {
       performUpdate,
     } = inventoryHome();
     return {
+      initialCreateDrugPhase,
+      createDrugError,
+      isProcessingCreateDrugPhase,
+      createDrugIsSuccessfull,
+      modalref,
+      nameModel,
+      nameError,
+      priceModel,
+      priceError,
+      amountInStockModel,
+      amountInStockError,
+      requiresPrescriptionModel,
+      descriptionModel,
+      descriptionError,
+      brandNameModel,
+      brandNameError,
+      countryOfOriginModel,
+      countryOfOriginError,
       searchQuery,
+      submitCreateDrug,
       inventoryList,
       pickedSort,
       drugRecomendations,
@@ -482,6 +784,48 @@ export default {
 </script>
 
 <style>
+input[id="switch"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+label[for="switch"] {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 50px;
+  height: 25px;
+  background: grey;
+  display: block;
+  border-radius: 25px;
+  position: relative;
+}
+
+label[for="switch"]:after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 15px;
+  height: 15px;
+  background: #fff;
+  border-radius: 15px;
+  transition: 0.2s;
+}
+
+input[id="switch"]:checked + label {
+  background: black;
+}
+
+input[id="switch"]:checked + label:after {
+  left: calc(100% - 5px);
+  transform: translateX(-100%);
+}
+
+label[for="switch"]:active:after {
+  width: 22px;
+}
+
 #expandButton:focus {
   outline: none;
   box-shadow: none;
@@ -500,6 +844,10 @@ input[type="text"]:disabled {
   background: transparent;
 
   /* border-style: none; */
+}
+
+.btn-check {
+  width: 30px;
 }
 #floating-search {
   position: -webkit-sticky;

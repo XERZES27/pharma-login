@@ -11,16 +11,18 @@ const validatePrice = (price) => {
   else return false;
 };
 
-
 const validateInStockAmount = (InStockAmount) => {
   if (!InStockAmount) return false;
   var stockAmount = Number(InStockAmount);
   if (Number.isNaN(stockAmount)) return false;
-  if (Number.isInteger(stockAmount) && stockAmount > 0 && stockAmount < 10000000)
+  if (
+    Number.isInteger(stockAmount) &&
+    stockAmount >= 0 &&
+    stockAmount < 10000000
+  )
     return true;
   else return false;
 };
-
 
 const validatePrescriptionRequired = (prescriptionRequired) => {
   if (prescriptionRequired === true || prescriptionRequired == false)
@@ -58,12 +60,17 @@ const drugModel = (row) => {
   };
 };
 
-const invalidRowCellError = (row) =>{
-  return [validateDrugName(row[0]),validatePrice(row[1]),validateInStockAmount(row[2]),
-  validatePrescriptionRequired(row[3]),validateDrugDescription(row[4]),validateBrandName(row[5]),
-  validateCountryOfOrigin(row[6])
-]
-}
+const invalidRowCellError = (row) => {
+  return [
+    validateDrugName(row[0]),
+    validatePrice(row[1]),
+    validateInStockAmount(row[2]),
+    validatePrescriptionRequired(row[3]),
+    validateDrugDescription(row[4]),
+    validateBrandName(row[5]),
+    validateCountryOfOrigin(row[6]),
+  ];
+};
 
 const validateRow = (row) => {
   //   console.log(row)
@@ -101,19 +108,30 @@ const DrugModels = (rows) => {
     if (gabInBetweenRows > 5) break;
     if (!row[0]) gabInBetweenRows += 1;
     if (validateRow(row) === true) {
-      var queryName = row[5] === undefined || row[5] === null ? row[0] : row[0] + row[5];
+      var queryName =
+        row[5] === undefined || row[5] === null ? row[0] : row[0] + row[5];
       if (uniqueRows.includes(queryName) == false) {
         uniqueRows.push(queryName);
         drugModels.push(drugModel(row));
       } else {
-        rowsWithRepetitionErrors.push({ Error: "Repeated", 'row': row,'index':index, cellColors:invalidRowCellError(row) });
+        rowsWithRepetitionErrors.push({
+          Error: "Repeated",
+          row: row,
+          index: index,
+          cellColors: invalidRowCellError(row),
+        });
       }
     } else {
-      rowsWithValidationErrors.push({ Error: "Validation", 'row': row, 'index':index, cellColors:invalidRowCellError(row) });
+      rowsWithValidationErrors.push({
+        Error: "Validation",
+        row: row,
+        index: index,
+        cellColors: invalidRowCellError(row),
+      });
     }
   }
 
-  return { drugModels, rowsWithValidationErrors,rowsWithRepetitionErrors };
+  return { drugModels, rowsWithValidationErrors, rowsWithRepetitionErrors };
 };
 
 const DrugModel = (row) => {
@@ -124,7 +142,14 @@ const DrugModel = (row) => {
   }
 };
 
-module.exports = { DrugModels, validatePrice,
+module.exports = {
+  DrugModel,
+  DrugModels,
+  validateDrugName,
+  validateDrugDescription,
+  validateBrandName,
+  validatePrice,
   validateInStockAmount,
   validatePrescriptionRequired,
-  validateCountryOfOrigin };
+  validateCountryOfOrigin,
+};

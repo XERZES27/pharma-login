@@ -53,6 +53,32 @@ const updateDrug = async (updateJson) => {
   });
   return promise;
 };
+
+const createDrug = async (drug) => {
+  const promise = new Promise((resolve, reject) => {
+    axios
+      .post(
+        process.env.VUE_APP_HOSTADDRESS + "inventory/createDrug",
+        {
+          drug: drug,
+        },
+        {
+          headers: store.getters.getHeader,
+        }
+      )
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        if (errorMiddleWare(error)) {
+          resolve();
+          return;
+        }
+        reject(error.response.data);
+      });
+  });
+  return promise;
+};
 const deleteDrug = async (id) => {
   const promise = new Promise((resolve, reject) => {
     axios
@@ -203,6 +229,7 @@ export {
   getDrugByNameBrandName,
   getDrugsAlphabetically,
   getDrugsByDate,
+  createDrug,
   updateDrug,
   deleteDrug,
 };

@@ -5,24 +5,122 @@ import {
   getDrugById,
   getDrugByNameBrandName,
   getDrugsByDate,
+  createDrug,
   updateDrug,
   deleteDrug,
 } from "../../repository/inventoryRepository";
 
 import {
+  DrugModel,
+  validateDrugName,
+  validateDrugDescription,
+  validateBrandName,
   validatePrice,
   validateInStockAmount,
   validatePrescriptionRequired,
   validateCountryOfOrigin,
 } from "../../models/drug.js";
 
-
 const inventoryHome = () => {
+  const initialCreateDrugPhase = ref(true);
+  const createDrugError = ref("");
+  const isProcessingCreateDrugPhase = ref(false);
+  const createDrugIsSuccessfull = ref(false);
+  const modalref = ref(false);
+  const nameModel = ref("");
+  const nameError = ref("");
+  const priceModel = ref("");
+  const priceError = ref("");
+  const amountInStockModel = ref("");
+  const amountInStockError = ref("");
+  const requiresPrescriptionModel = ref(false);
+  const descriptionModel = ref("");
+  const descriptionError = ref("");
+  const brandNameModel = ref("");
+  const brandNameError = ref("");
+  const countryOfOriginModel = ref("");
+  const countryOfOriginError = ref("");
   const searchQuery = ref("");
   const drugRecomendations = ref([]);
   const inventoryList = ref([]);
   const pickedSort = ref("Alphabetically");
-  const resultCameEmpty = ref('');
+  const resultCameEmpty = ref("");
+
+  watch(nameModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validatePrice(newValue)) nameError.value = "";
+    }
+  });
+
+  watch(priceModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validatePrice(newValue)) priceError.value = "";
+      else
+        priceError.value =
+          "Price Must be a Number Greater than 0 and less than 100,000";
+    }
+  });
+  watch(amountInStockModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validateInStockAmount(newValue)) amountInStockError.value = "";
+      else
+        amountInStockError.value =
+          "Amount In Stock Must be a Positive Integer Number less than 10,000,000";
+    }
+  });
+  watch(descriptionModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validateDrugDescription(newValue)) descriptionError.value = "";
+      else
+        descriptionError.value =
+          "Description Must be greater than 10 characters and less than 500 characters";
+    }
+  });
+  watch(brandNameModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validateBrandName(newValue)) brandNameError.value = "";
+      else brandNameError.value = "Description Must be less than 50 characters";
+    }
+  });
+  watch(countryOfOriginModel, (newValue, oldValue) => {
+    if (newValue !== "") {
+      if (validateCountryOfOrigin(newValue)) countryOfOriginError.value = "";
+      else countryOfOriginError.value = "Please Use a real country";
+    }
+  });
+
+  const submitCreateDrug = () => {
+    var hasErrors = false;
+    if (nameModel.value === "") {
+      nameError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (priceModel.value === "") {
+      priceError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (amountInStockModel.value === "") {
+      amountInStockError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (descriptionModel.value === "") {
+      descriptionError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (!hasErrors) {
+      console.log(
+        DrugModel([
+          nameModel.value,
+          Number(priceModel.value),
+          Number(amountInStockModel.value),
+          requiresPrescriptionModel.value,
+          descriptionModel.value,
+          brandNameModel.value === "" ? null : brandNameModel.value,
+          countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
+        ])
+      );
+    }
+  };
 
   watch(pickedSort, (newValue, oldValue) => {
     if (newValue !== oldValue) {
@@ -31,6 +129,18 @@ const inventoryHome = () => {
   });
   onMounted(() => {
     getInventory();
+    modalref.value.addEventListener("show.bs.modal", function(event) {
+      // console.log("opened");
+    });
+    modalref.value.addEventListener("hidden.bs.modal", function(event) {
+      nameModel.value = "";
+      priceModel.value = "";
+      amountInStockModel.value = "";
+      requiresPrescriptionModel.value = false;
+      descriptionModel.value = "";
+      brandNameModel.value = "";
+      countryOfOriginModel.value = "";
+    });
   });
 
   function debounce(func, timeout = 500) {
@@ -59,18 +169,24 @@ const inventoryHome = () => {
       return (drugRecomendations.value = []);
     }
   });
-  const checkIfUpdateIsAllowed = (index)=>{
-    if(Number(inventoryList.value[index]["priceModel"]) !==
-    inventoryList.value[index]["price"] && Number(inventoryList.value[index]["amountInStockModel"]) !==
-    inventoryList.value[index]["amountInStock"] && inventoryList.value[index]["requiresPrescriptionModel"] !==
-    inventoryList.value[index]["requiresPrescription"] && inventoryList.value[index]["countryOfOriginModel"] !==
-    inventoryList.value[index]["countryOfOrigin"] &&
-  !(
-    inventoryList.value[index]["countryOfOriginModel"] === "" &&
-    !inventoryList.value[index]["countryOfOrigin"]
-  ))return true
-  else return false
-  }
+  const checkIfUpdateIsAllowed = (index) => {
+    if (
+      Number(inventoryList.value[index]["priceModel"]) !==
+        inventoryList.value[index]["price"] &&
+      Number(inventoryList.value[index]["amountInStockModel"]) !==
+        inventoryList.value[index]["amountInStock"] &&
+      inventoryList.value[index]["requiresPrescriptionModel"] !==
+        inventoryList.value[index]["requiresPrescription"] &&
+      inventoryList.value[index]["countryOfOriginModel"] !==
+        inventoryList.value[index]["countryOfOrigin"] &&
+      !(
+        inventoryList.value[index]["countryOfOriginModel"] === "" &&
+        !inventoryList.value[index]["countryOfOrigin"]
+      )
+    )
+      return true;
+    else return false;
+  };
 
   const resetToInitialData = (index) => {
     inventoryList.value[index]["priceModel"] =
@@ -81,7 +197,7 @@ const inventoryHome = () => {
       inventoryList.value[index]["requiresPrescription"];
     inventoryList.value[index]["countryOfOriginModel"] =
       inventoryList.value[index]["countryOfOrigin"];
-      inventoryList.value[index]["priceError"] = "";
+    inventoryList.value[index]["priceError"] = "";
     inventoryList.value[index]["amountInStockError"] = "";
     inventoryList.value[index]["requiresPrescriptionError"] = "";
     inventoryList.value[index]["countryOfOriginError"] = "";
@@ -129,52 +245,45 @@ const inventoryHome = () => {
     });
   };
 
-  
-
-  const queryDrugById = (id)=>{
-    getDrugById(id).then(
-      (response)=>{
-        if(response.data.length!==0){
-        inventoryList.value = response.data
-          preloadInventory()
-      }
-        else{
-          resultCameEmpty.value = `Well this is awkward (・_・ヾ`
+  const queryDrugById = (id) => {
+    getDrugById(id)
+      .then((response) => {
+        if (response.data.length !== 0) {
+          inventoryList.value = response.data;
+          preloadInventory();
+        } else {
+          resultCameEmpty.value = `Well this is awkward (・_・ヾ`;
           setTimeout(() => {
-            resultCameEmpty.value = '';
-          },10000);
+            resultCameEmpty.value = "";
+          }, 10000);
         }
       })
-      .catch((error)=>{
-        console.log(error)
-      })
-      drugRecomendations.value = []
-
-  }
-  const queryDrugByNameOrBrandName = (query)=>{
-    if(query.trim()!=='')
-    {
-      getDrugByNameBrandName(query).then(
-      (response)=>{
-        console.log(response)
-        if(response.data.length!==0){
-        inventoryList.value = response.data
-          preloadInventory()
-      }
-        else{
-          resultCameEmpty.value = `Sorry we couldn't find anything ¯\\_(ツ)_/¯`
-          setTimeout(() => {
-            resultCameEmpty.value = '';
-          },10000);
-        }
-      })
-      .catch((error)=>{
-        console.log(error)
-      })}
-      drugRecomendations.value = []
-  }
-
- 
+      .catch((error) => {
+        console.log(error);
+      });
+    drugRecomendations.value = [];
+  };
+  const queryDrugByNameOrBrandName = (query) => {
+    if (query.trim() !== "") {
+      getDrugByNameBrandName(query)
+        .then((response) => {
+          console.log(response);
+          if (response.data.length !== 0) {
+            inventoryList.value = response.data;
+            preloadInventory();
+          } else {
+            resultCameEmpty.value = `Sorry we couldn't find anything ¯\\_(ツ)_/¯`;
+            setTimeout(() => {
+              resultCameEmpty.value = "";
+            }, 10000);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    drugRecomendations.value = [];
+  };
 
   const performUpdate = async (index) => {
     const updateJson = {};
@@ -248,18 +357,18 @@ const inventoryHome = () => {
       }
     }
     const updateJsonKeys = Object.keys(updateJson);
-    if (hasErrors === false && updateJsonKeys.length !==0) {
+    if (hasErrors === false && updateJsonKeys.length !== 0) {
       updateJson["id"] = inventoryList.value[index]["_id"];
       inventoryList.value[index]["isProcessing"] = false;
-      
+
       updateDrug(updateJson)
         .then((response) => {
           inventoryList.value[index]["isProcessing"] = false;
           if (response.status === "Pass") {
             inventoryList.value[index]["updateSuccess"] = true;
             inventoryList.value[index]["isNotEditable"] = true;
-            updateJsonKeys.forEach(key => {
-              inventoryList.value[index][key] = updateJson[key]
+            updateJsonKeys.forEach((key) => {
+              inventoryList.value[index][key] = updateJson[key];
             });
             setTimeout(() => {
               inventoryList.value[index]["updateSuccess"] = false;
@@ -276,23 +385,23 @@ const inventoryHome = () => {
             inventoryList.value[index][`${error.Error}Error`] =
               "Rejected By Server";
           }
-          if(error.status==="Invalid Request"){
+          if (error.status === "Invalid Request") {
             inventoryList.value[index][
               "updateError"
             ] = `Please check your connection`;
           }
-          if(error.status==="Data is required"){
+          if (error.status === "Data is required") {
             inventoryList.value[index][
               "updateError"
             ] = `Please stop making empty requests`;
           }
-          if(error.status==="Fail D"){
+          if (error.status === "Fail D") {
             inventoryList.value[index][
               "updateError"
             ] = `Please contact the developers to report this error`;
           }
-          if(error.status==="Fail"){
-            console.log(error.data)
+          if (error.status === "Fail") {
+            console.log(error.data);
             inventoryList.value[index][
               "updateError"
             ] = `Please contact the developers to report this error`;
@@ -325,6 +434,25 @@ const inventoryHome = () => {
   };
 
   return {
+    initialCreateDrugPhase,
+    createDrugError,
+    isProcessingCreateDrugPhase,
+    createDrugIsSuccessfull,
+    modalref,
+    nameModel,
+    nameError,
+    priceModel,
+    priceError,
+    amountInStockModel,
+    amountInStockError,
+    requiresPrescriptionModel,
+    descriptionModel,
+    descriptionError,
+    brandNameModel,
+    brandNameError,
+    countryOfOriginModel,
+    countryOfOriginError,
+    submitCreateDrug,
     searchQuery,
     inventoryList,
     pickedSort,
