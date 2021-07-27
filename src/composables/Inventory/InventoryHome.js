@@ -26,7 +26,8 @@ const inventoryHome = () => {
   const createDrugError = ref("");
   const isProcessingCreateDrugPhase = ref(false);
   const createDrugIsSuccessfull = ref(false);
-  const modalref = ref(false);
+  const addDrugModalRef = ref(false);
+  const confirmDeleteModalRef = ref(false);
   const nameModel = ref("");
   const nameError = ref("");
   const priceModel = ref("");
@@ -45,6 +46,9 @@ const inventoryHome = () => {
   const inventoryList = ref([]);
   const pickedSort = ref("Alphabetically");
   const resultCameEmpty = ref("");
+  const currentDrugToDelete = ref('');
+  //pagination
+  var pageNumber = 0;
 
   watch(nameModel, (newValue, oldValue) => {
     if (newValue !== "") {
@@ -89,38 +93,7 @@ const inventoryHome = () => {
     }
   });
 
-  const submitCreateDrug = () => {
-    var hasErrors = false;
-    if (nameModel.value === "") {
-      nameError.value = "Field Is Required";
-      hasErrors = true;
-    }
-    if (priceModel.value === "") {
-      priceError.value = "Field Is Required";
-      hasErrors = true;
-    }
-    if (amountInStockModel.value === "") {
-      amountInStockError.value = "Field Is Required";
-      hasErrors = true;
-    }
-    if (descriptionModel.value === "") {
-      descriptionError.value = "Field Is Required";
-      hasErrors = true;
-    }
-    if (!hasErrors) {
-      console.log(
-        DrugModel([
-          nameModel.value,
-          Number(priceModel.value),
-          Number(amountInStockModel.value),
-          requiresPrescriptionModel.value,
-          descriptionModel.value,
-          brandNameModel.value === "" ? null : brandNameModel.value,
-          countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
-        ])
-      );
-    }
-  };
+  
 
   watch(pickedSort, (newValue, oldValue) => {
     if (newValue !== oldValue) {
@@ -129,10 +102,13 @@ const inventoryHome = () => {
   });
   onMounted(() => {
     getInventory();
-    modalref.value.addEventListener("show.bs.modal", function(event) {
+    confirmDeleteModalRef.value.addEventListener("hidden.bs.modal", function(event) {
+      currentDrugToDelete.value = '';
+    });
+    addDrugModalRef.value.addEventListener("show.bs.modal", function(event) {
       // console.log("opened");
     });
-    modalref.value.addEventListener("hidden.bs.modal", function(event) {
+    addDrugModalRef.value.addEventListener("hidden.bs.modal", function(event) {
       nameModel.value = "";
       priceModel.value = "";
       amountInStockModel.value = "";
@@ -140,6 +116,13 @@ const inventoryHome = () => {
       descriptionModel.value = "";
       brandNameModel.value = "";
       countryOfOriginModel.value = "";
+      createDrugError.value = "";
+      nameError.value = "";
+      priceError.value = "";
+      amountInStockError.value = "";
+      descriptionError.value = "";
+      brandNameError.value = "";
+      countryOfOriginError.value = "";
     });
   });
 
@@ -230,7 +213,9 @@ const inventoryHome = () => {
       el["updateFailed"] = false;
       el["updateError"] = "";
       el["updateSuccess"] = false;
+      el["deleteSuccess"] = false;
       el["deleteFailed"] = false;
+      el["deleteError"] = "";
       el["priceModel"] = el["price"];
       el["amountInStockModel"] = el["amountInStock"];
       el["requiresPrescriptionModel"] = el["requiresPrescription"];
@@ -283,6 +268,91 @@ const inventoryHome = () => {
         });
     }
     drugRecomendations.value = [];
+  };
+  const getInventory = async(PageNumber = 0) => {
+    pageNumber = PageNumber
+    if (pickedSort.value == "Alphabetically") {
+      getDrugsAlphabetically(pageNumber)
+        .then((response) => {
+          pageNumber +=1
+          inventoryList.value = response.data;
+          preloadInventory();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    if (pickedSort.value == "By Date") {
+      getDrugsByDate(pageNumber)
+        .then((response) => {
+          pageNumber +=1
+          inventoryList.value = response.data;
+          preloadInventory();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const performCreate = async () => {
+    var hasErrors = false;
+    if (nameModel.value === "") {
+      nameError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (priceModel.value === "") {
+      priceError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (amountInStockModel.value === "") {
+      amountInStockError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (descriptionModel.value === "") {
+      descriptionError.value = "Field Is Required";
+      hasErrors = true;
+    }
+    if (!hasErrors) {
+      createDrugIsSuccessfull.value = false;
+      initialCreateDrugPhase.value = false;
+      isProcessingCreateDrugPhase.value = true;
+      createDrug(
+        DrugModel([
+          nameModel.value,
+          Number(priceModel.value),
+          Number(amountInStockModel.value),
+          requiresPrescriptionModel.value,
+          descriptionModel.value,
+          brandNameModel.value === "" ? null : brandNameModel.value,
+          countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
+        ])
+      )
+        .then((response) => {
+          createDrugIsSuccessfull.value = true;
+          initialCreateDrugPhase.value = true;
+          isProcessingCreateDrugPhase.value = false;
+          console.log(response.data);
+        })
+        .catch((error) => {
+          isProcessingCreateDrugPhase.value = false;
+          initialCreateDrugPhase.value = true;
+          if (error.status === "Invalid Data") {
+            console.log(error.data);
+            const errKeys = Object.keys(error.data);
+            if (errKeys.includes("repetitionError"))
+              createDrugError.value =
+                "This Drug Already Exists In Your Database";
+            if (errKeys.includes("validationError"))
+              createDrugError.value = "Validation Errors Occured In Server";
+          } else if (error.status === "drug is required") {
+            createDrugError.value = "Something went while data was being sent";
+          } else {
+            console.log(error);
+            createDrugError.value = "Please Check Your Connection";
+          }
+        });
+    }
   };
 
   const performUpdate = async (index) => {
@@ -359,7 +429,7 @@ const inventoryHome = () => {
     const updateJsonKeys = Object.keys(updateJson);
     if (hasErrors === false && updateJsonKeys.length !== 0) {
       updateJson["id"] = inventoryList.value[index]["_id"];
-      inventoryList.value[index]["isProcessing"] = false;
+      inventoryList.value[index]["isProcessing"] = true;
 
       updateDrug(updateJson)
         .then((response) => {
@@ -378,67 +448,87 @@ const inventoryHome = () => {
         .catch((error) => {
           inventoryList.value[index]["isProcessing"] = false;
           inventoryList.value[index]["updateFailed"] = true;
-          if (error.status === "Invalid Data") {
-            inventoryList.value[index][
-              "updateError"
-            ] = `The Error was caused by ${error.Error}`;
-            inventoryList.value[index][`${error.Error}Error`] =
-              "Rejected By Server";
-          }
-          if (error.status === "Invalid Request") {
-            inventoryList.value[index][
-              "updateError"
-            ] = `Please check your connection`;
-          }
-          if (error.status === "Data is required") {
-            inventoryList.value[index][
-              "updateError"
-            ] = `Please stop making empty requests`;
-          }
-          if (error.status === "Fail D") {
-            inventoryList.value[index][
-              "updateError"
-            ] = `Please contact the developers to report this error`;
-          }
-          if (error.status === "Fail") {
-            console.log(error.data);
-            inventoryList.value[index][
-              "updateError"
-            ] = `Please contact the developers to report this error`;
+          if(error.status){
+            if (error.status === "Invalid Data") {
+              inventoryList.value[index][
+                "updateError"
+              ] = `The Error was caused by ${error.Error}`;
+              inventoryList.value[index][`${error.Error}Error`] =
+                "Rejected By Server";
+            }
+            if (error.status === "Invalid Request") {
+              inventoryList.value[index][
+                "updateError"
+              ] = `Please check your connection`;
+            }
+            if (error.status === "Data is required") {
+              inventoryList.value[index][
+                "updateError"
+              ] = `Please stop making empty requests`;
+            }
+            if (error.status === "Fail D") {
+              inventoryList.value[index][
+                "updateError"
+              ] = `Please contact the developers to report this error`;
+            }
+            if (error.status === "Fail") {
+              console.log(error.data);
+              inventoryList.value[index][
+                "updateError"
+              ] = `Please contact the developers to report this error`;
+            }
+          } else {
+            inventoryList.value[index]["updateError"] = `Please Check Your Connection`;
           }
         });
     }
   };
 
-  const getInventory = () => {
-    if (pickedSort.value == "Alphabetically") {
-      getDrugsAlphabetically()
-        .then((response) => {
-          inventoryList.value = response.data;
-          preloadInventory();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-    if (pickedSort.value == "By Date") {
-      getDrugsByDate()
-        .then((response) => {
-          inventoryList.value = response.data;
-          preloadInventory();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  };
+ 
+
+  const performDelete = async(index) =>{
+    const id = inventoryList.value[index]['_id'];
+    inventoryList.value[index]["isProcessing"] = true;
+    deleteDrug(id).then((response)=>{
+      inventoryList.value[index]["isProcessing"] = false;
+      if(response.status==='Pass'){
+        inventoryList.value[index]["deleteSuccess"] = true;
+        setTimeout(() => {
+          inventoryList.value.splice(index,1)
+        }, 4000);
+
+      }
+    }).catch((error)=>{
+      inventoryList.value[index]["isProcessing"] = false;
+      inventoryList.value[index]["deleteFailed"] = true;
+      if(error.status){
+        if(error.status==='ID is required'){
+          inventoryList.value[index]["deleteError"] = 'Request Is Missing ID'
+        }
+        else if(error.status ==='Fail D'){
+          inventoryList.value[index]["deleteError"] = 'Unknown Error'
+        }
+        else if(error.status ==='Fail'){
+          inventoryList.value[index]["deleteError"] = error.data
+        }
+      }
+      else{
+        inventoryList.value[index]["deleteError"] = "Please Check Your Connection"
+      }
+    })
+    
+
+  }
+
+
 
   return {
     initialCreateDrugPhase,
     createDrugError,
     isProcessingCreateDrugPhase,
     createDrugIsSuccessfull,
-    modalref,
+    addDrugModalRef,
+    confirmDeleteModalRef,
     nameModel,
     nameError,
     priceModel,
@@ -452,12 +542,12 @@ const inventoryHome = () => {
     brandNameError,
     countryOfOriginModel,
     countryOfOriginError,
-    submitCreateDrug,
     searchQuery,
     inventoryList,
     pickedSort,
     drugRecomendations,
     resultCameEmpty,
+    currentDrugToDelete,
     disableDeleteFailedMessage,
     disableUpdateMessage,
     toggleMore,
@@ -467,7 +557,9 @@ const inventoryHome = () => {
     processChange,
     queryDrugById,
     queryDrugByNameOrBrandName,
+    performCreate,
     performUpdate,
+    performDelete,
   };
 };
 

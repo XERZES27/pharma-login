@@ -177,11 +177,11 @@ const getDrugByNameBrandName = (query) => {
   return promise;
 };
 
-const getDrugsAlphabetically = () => {
+const getDrugsAlphabetically = (pageNumber) => {
   const promise = new Promise((resolve, reject) => {
     axios
       .get(
-        process.env.VUE_APP_HOSTADDRESS + `inventory/getDrugsAlphabetically`,
+        process.env.VUE_APP_HOSTADDRESS + `inventory/getDrugsAlphabetically?pageNumber=${pageNumber}`,
         {
           headers: store.getters.getHeader,
         }
@@ -201,10 +201,10 @@ const getDrugsAlphabetically = () => {
   return promise;
 };
 
-const getDrugsByDate = () => {
+const getDrugsByDate = (pageNumber) => {
   const promise = new Promise((resolve, reject) => {
     axios
-      .get(process.env.VUE_APP_HOSTADDRESS + `inventory/getDrugsByTime`, {
+      .get(process.env.VUE_APP_HOSTADDRESS + `inventory/getDrugsByTime?pageNumber=${pageNumber}`, {
         headers: store.getters.getHeader,
       })
       .then((response) => {

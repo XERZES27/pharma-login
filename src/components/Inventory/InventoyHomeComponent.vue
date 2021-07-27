@@ -1,10 +1,57 @@
 <template>
   <section id="inventoryHome">
     <div class="container-md">
-      <!-- Modal -->
+      <!-- Confirm Delete Modal -->
+      <div
+       
+        class="modal fade"
+        ref="confirmDeleteModalRef"
+        id="confirmDelete"
+        tabindex="-1"
+        aria-labelledby="confirmDeleteLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="confirmDeleteLabel">ARE YOU SURE?</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <strong
+                >YOU ARE ABOUT TO DELETE
+                <p class="text-danger" v-if="currentDrugToDelete !== ''">{{ inventoryList[currentDrugToDelete]["name"] }}</p>
+                WITH BRAND NAME
+                <p class="text-danger" v-if="currentDrugToDelete !== ''">
+                  {{ inventoryList[currentDrugToDelete]["brandName"] }}
+                </p></strong
+              >
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-dismiss="modal"
+              >
+                CLOSE
+              </button>
+              <button type="button" class="btn btn-danger"
+              @click="performDelete(currentDrugToDelete)"
+              data-bs-dismiss="modal"
+              >DELETE</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Create Drug Modal -->
       <div
         class="modal fade"
-        ref="modalref"
+        ref="addDrugModalRef"
         data-bs-backdrop="static"
         id="exampleModal"
         tabindex="-1"
@@ -17,7 +64,7 @@
                 <strong>Add Drug</strong>
               </h5>
               <button
-              :disabled="isProcessingCreateDrugPhase"
+                :disabled="isProcessingCreateDrugPhase"
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
@@ -26,9 +73,17 @@
             </div>
             <div class="modal-body">
               <div v-if="initialCreateDrugPhase" class="container-md">
-                <div class="row">
+                <div v-if="!createDrugIsSuccessfull" class="row">
                   <p class="text-danger ps-2">
                     <strong>{{ createDrugError }}</strong>
+                  </p>
+                </div>
+                <div v-if="createDrugIsSuccessfull" class="row">
+                  <p class="text-success ps-2">
+                    <strong
+                      >Congratulation, The Drug Has been Added to your
+                      database</strong
+                    >
                   </p>
                 </div>
                 <div class="row">
@@ -42,6 +97,7 @@
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -71,6 +127,7 @@
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -99,6 +156,7 @@
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -137,11 +195,12 @@
                   >
                 </div>
                 <div class="row ms-1">
-                  <input
+                  <textarea
                     v-model="descriptionModel"
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -170,6 +229,7 @@
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -198,6 +258,7 @@
                     style="outline: none; box-shadow: none"
                     type="text "
                     class="
+                      fw-bold
                       form-control
                       border-2
                       border-top-0
@@ -217,20 +278,21 @@
                 </div>
               </div>
               <div v-if="isProcessingCreateDrugPhase" class="container-md">
-                <p class="text-info fs-4 pb-2">Please wait while we process your request ...</p>
+                <p class="text-info fs-4 pb-2">
+                  Please wait while we process your request ...
+                </p>
                 <div
                   class="spinner-border text-info"
                   style="width: 3rem; height: 3rem"
                   role="status"
                 >
-                
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </div>
             </div>
             <div class="modal-footer bg-light">
               <button
-              :disabled="isProcessingCreateDrugPhase"
+                :disabled="isProcessingCreateDrugPhase"
                 type="button"
                 class="btn btn-danger"
                 data-bs-dismiss="modal"
@@ -249,7 +311,7 @@
                 "
                 type="button"
                 class="btn btn-dark"
-                @click="submitCreateDrug"
+                @click="performCreate"
               >
                 Create
               </button>
@@ -443,11 +505,22 @@
             </p>
           </div>
           <div
-            v-if="inventory['deleteFailed']"
+            v-if="inventory['deleteFailed'] || inventory['deleteSuccess']"
             class="d-flex justify-content-between align-items-center"
           >
-            <p class="d-inline text-danger pt-2 ps-3">
-              <strong>Failed to delete</strong>
+            <p
+              :class="{
+                'text-danger': inventory['deleteFailed'],
+                'text-success': inventory['deleteSuccess'],
+              }"
+              class="d-inline pt-2 ps-3"
+            >
+              <strong v-if="inventory['deleteFailed']">{{
+                inventory["deleteError"]
+              }}</strong>
+              <strong v-if="inventory['deleteSuccess']"
+                >Deleted Successfully</strong
+              >
             </p>
             <i
               type="button"
@@ -652,8 +725,15 @@
                 ></i>
                 <i
                   type="button"
+                  @click="
+                    {
+                      currentDrugToDelete = index;
+                    }
+                  "
                   class="bi bi-trash"
                   style="font-size: 110%"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmDelete"
                 ></i>
               </div>
             </div>
@@ -695,11 +775,13 @@
 <script>
 import { inventoryHome } from "../../composables/Inventory/InventoryHome";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { bootstrap } from "bootstrap/dist/css/bootstrap.min.css";
-import { onMounted } from "vue";
+import "bootstrap/dist/css/bootstrap.min.css"
+import 'bootstrap';
 export default {
-  mounted() {},
+  name: "InventoryHomeComponent",
+  components: {},
   methods: {
+    //TODO allow pagination
     onClickAway(event) {
       if (this.drugRecomendations.length != 0) this.drugRecomendations = [];
     },
@@ -714,7 +796,8 @@ export default {
       createDrugError,
       isProcessingCreateDrugPhase,
       createDrugIsSuccessfull,
-      modalref,
+      addDrugModalRef,
+      confirmDeleteModalRef,
       nameModel,
       nameError,
       priceModel,
@@ -728,12 +811,12 @@ export default {
       brandNameError,
       countryOfOriginModel,
       countryOfOriginError,
-      submitCreateDrug,
       searchQuery,
       inventoryList,
       pickedSort,
       drugRecomendations,
       resultCameEmpty,
+      currentDrugToDelete,
       disableDeleteFailedMessage,
       disableUpdateMessage,
       toggleMore,
@@ -742,14 +825,17 @@ export default {
       processChange,
       queryDrugById,
       queryDrugByNameOrBrandName,
+      performCreate,
       performUpdate,
+      performDelete,
     } = inventoryHome();
     return {
       initialCreateDrugPhase,
       createDrugError,
       isProcessingCreateDrugPhase,
       createDrugIsSuccessfull,
-      modalref,
+      addDrugModalRef,
+      confirmDeleteModalRef,
       nameModel,
       nameError,
       priceModel,
@@ -764,11 +850,11 @@ export default {
       countryOfOriginModel,
       countryOfOriginError,
       searchQuery,
-      submitCreateDrug,
       inventoryList,
       pickedSort,
       drugRecomendations,
       resultCameEmpty,
+      currentDrugToDelete,
       disableDeleteFailedMessage,
       disableUpdateMessage,
       toggleMore,
@@ -777,7 +863,9 @@ export default {
       processChange,
       queryDrugById,
       queryDrugByNameOrBrandName,
+      performCreate,
       performUpdate,
+      performDelete,
     };
   },
 };

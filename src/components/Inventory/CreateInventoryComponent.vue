@@ -535,7 +535,8 @@
 
 <script>
 import { createInventory } from "../../composables/Inventory/CreateInventory";
-
+import 'bootstrap';
+import "bootstrap/dist/css/bootstrap.min.css"
 export default {
   setup(props, context) {
     const {
