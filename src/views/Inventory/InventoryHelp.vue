@@ -1,7 +1,7 @@
 <template>
   <section id="bulk upload">
     <div class="container-lg">
-      <div class="row bg-light align-items-center text-start mb-5">
+      <div class="row  align-items-center text-start mb-5" id="Heading">
         <div
           class="col-md-12 py-4 ps-5 display-4"
           style="font-family: 'Times New Roman', serif"
@@ -401,4 +401,7 @@ export default {};
 </script>
 
 <style>
+#Heading {
+  background-color: #edf2fa;
+}
 </style>

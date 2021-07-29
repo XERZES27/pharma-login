@@ -46,7 +46,9 @@ const inventoryHome = () => {
   const inventoryList = ref([]);
   const pickedSort = ref("Alphabetically");
   const resultCameEmpty = ref("");
-  const currentDrugToDelete = ref('');
+  const emptyInventory = ref("");
+  const currentDrugToDelete = ref("");
+  const hasScrolledToBottom = ref(false)
   //pagination
   var pageNumber = 0;
 
@@ -93,8 +95,6 @@ const inventoryHome = () => {
     }
   });
 
-  
-
   watch(pickedSort, (newValue, oldValue) => {
     if (newValue !== oldValue) {
       getInventory();
@@ -102,8 +102,10 @@ const inventoryHome = () => {
   });
   onMounted(() => {
     getInventory();
-    confirmDeleteModalRef.value.addEventListener("hidden.bs.modal", function(event) {
-      currentDrugToDelete.value = '';
+    confirmDeleteModalRef.value.addEventListener("hidden.bs.modal", function(
+      event
+    ) {
+      currentDrugToDelete.value = "";
     });
     addDrugModalRef.value.addEventListener("show.bs.modal", function(event) {
       // console.log("opened");
@@ -126,7 +128,7 @@ const inventoryHome = () => {
     });
   });
 
-  function debounce(func, timeout = 500) {
+  function debounce(func, timeout = 300) {
     let timer;
     return (...args) => {
       clearTimeout(timer);
@@ -190,6 +192,9 @@ const inventoryHome = () => {
     inventoryList.value[index]["isNotEditable"] = !inventoryList.value[index][
       "isNotEditable"
     ];
+    inventoryList.value[index]["toggleMore"] = !inventoryList.value[index][
+      "isNotEditable"
+    ];
     resetToInitialData(index);
   };
   const disableDeleteFailedMessage = (index) => {
@@ -230,11 +235,39 @@ const inventoryHome = () => {
     });
   };
 
+  const postLoadInventory = (inventory)=>{
+    var currentInventory = inventory;
+    currentInventory.map((el) => {
+      el["isNotEditable"] = true;
+      el["updateFailed"] = false;
+      el["updateError"] = "";
+      el["updateSuccess"] = false;
+      el["deleteSuccess"] = false;
+      el["deleteFailed"] = false;
+      el["deleteError"] = "";
+      el["priceModel"] = el["price"];
+      el["amountInStockModel"] = el["amountInStock"];
+      el["requiresPrescriptionModel"] = el["requiresPrescription"];
+      el["countryOfOriginModel"] = el["countryOfOrigin"];
+      el["priceError"] = "";
+      el["amountInStockError"] = "";
+      el["requiresPrescriptionError"] = "";
+      el["countryOfOriginError"] = "";
+      el["toggleMore"] = false;
+      el["creationDate"] = new Date(el["creationDate"]).toLocaleString();
+      el["isProcessing"] = false;
+    });
+    return currentInventory;
+
+
+  }
+
   const queryDrugById = (id) => {
     getDrugById(id)
       .then((response) => {
         if (response.data.length !== 0) {
           inventoryList.value = response.data;
+          hasScrolledToBottom.value = true;
           preloadInventory();
         } else {
           resultCameEmpty.value = `Well this is awkward (・_・ヾ`;
@@ -252,9 +285,9 @@ const inventoryHome = () => {
     if (query.trim() !== "") {
       getDrugByNameBrandName(query)
         .then((response) => {
-          console.log(response);
           if (response.data.length !== 0) {
             inventoryList.value = response.data;
+          hasScrolledToBottom.value = true;
             preloadInventory();
           } else {
             resultCameEmpty.value = `Sorry we couldn't find anything ¯\\_(ツ)_/¯`;
@@ -269,26 +302,46 @@ const inventoryHome = () => {
     }
     drugRecomendations.value = [];
   };
-  const getInventory = async(PageNumber = 0) => {
-    pageNumber = PageNumber
+
+  const loadData = (response,Options)=>{
+    
+    if(response.data.length!==0){
+      pageNumber += 1;
+      hasScrolledToBottom.value = false
+      if(Options==="reset"){
+        inventoryList.value = response.data;
+        preloadInventory();
+      }
+      else{
+        
+        
+        var toInventory = postLoadInventory(response.data)
+        toInventory.map((el)=>{
+          inventoryList.value.push(el)
+        })
+
+      }
+      
+      
+    }
+    else {
+      emptyInventory.value =
+        "Your Inventory Is Currently Empty, Press The Upload Button To Import Data From An Excel(.xlsx) File Or Press The Add Button To Create A Single Drug";
+    }
+  }
+  const getInventory = async (Options="reset") => {
+    if(Options==="reset")pageNumber = 0
+    emptyInventory.value = "";
     if (pickedSort.value == "Alphabetically") {
       getDrugsAlphabetically(pageNumber)
-        .then((response) => {
-          pageNumber +=1
-          inventoryList.value = response.data;
-          preloadInventory();
-        })
+        .then((response) => loadData(response,Options))
         .catch((error) => {
           console.log(error);
         });
     }
     if (pickedSort.value == "By Date") {
       getDrugsByDate(pageNumber)
-        .then((response) => {
-          pageNumber +=1
-          inventoryList.value = response.data;
-          preloadInventory();
-        })
+        .then((response) => loadData(response,Options))
         .catch((error) => {
           console.log(error);
         });
@@ -448,7 +501,7 @@ const inventoryHome = () => {
         .catch((error) => {
           inventoryList.value[index]["isProcessing"] = false;
           inventoryList.value[index]["updateFailed"] = true;
-          if(error.status){
+          if (error.status) {
             if (error.status === "Invalid Data") {
               inventoryList.value[index][
                 "updateError"
@@ -478,49 +531,44 @@ const inventoryHome = () => {
               ] = `Please contact the developers to report this error`;
             }
           } else {
-            inventoryList.value[index]["updateError"] = `Please Check Your Connection`;
+            inventoryList.value[index][
+              "updateError"
+            ] = `Please Check Your Connection`;
           }
         });
     }
   };
 
- 
-
-  const performDelete = async(index) =>{
-    const id = inventoryList.value[index]['_id'];
+  const performDelete = async (index) => {
+    const id = inventoryList.value[index]["_id"];
     inventoryList.value[index]["isProcessing"] = true;
-    deleteDrug(id).then((response)=>{
-      inventoryList.value[index]["isProcessing"] = false;
-      if(response.status==='Pass'){
-        inventoryList.value[index]["deleteSuccess"] = true;
-        setTimeout(() => {
-          inventoryList.value.splice(index,1)
-        }, 4000);
-
-      }
-    }).catch((error)=>{
-      inventoryList.value[index]["isProcessing"] = false;
-      inventoryList.value[index]["deleteFailed"] = true;
-      if(error.status){
-        if(error.status==='ID is required'){
-          inventoryList.value[index]["deleteError"] = 'Request Is Missing ID'
+    deleteDrug(id)
+      .then((response) => {
+        inventoryList.value[index]["isProcessing"] = false;
+        if (response.status === "Pass") {
+          inventoryList.value[index]["deleteSuccess"] = true;
+          setTimeout(() => {
+            inventoryList.value.splice(index, 1);
+          }, 4000);
         }
-        else if(error.status ==='Fail D'){
-          inventoryList.value[index]["deleteError"] = 'Unknown Error'
+      })
+      .catch((error) => {
+        inventoryList.value[index]["isProcessing"] = false;
+        inventoryList.value[index]["deleteFailed"] = true;
+        if (error.status) {
+          if (error.status === "ID is required") {
+            inventoryList.value[index]["deleteError"] = "Request Is Missing ID";
+          } else if (error.status === "Fail D") {
+            inventoryList.value[index]["deleteError"] = "Unknown Error";
+          } else if (error.status === "Fail") {
+            inventoryList.value[index]["deleteError"] = error.data;
+          }
+        } else {
+          inventoryList.value[index]["deleteError"] =
+            "Please Check Your Connection";
         }
-        else if(error.status ==='Fail'){
-          inventoryList.value[index]["deleteError"] = error.data
-        }
-      }
-      else{
-        inventoryList.value[index]["deleteError"] = "Please Check Your Connection"
-      }
-    })
-    
-
-  }
-
-
+      });
+  };
 
   return {
     initialCreateDrugPhase,
@@ -547,7 +595,9 @@ const inventoryHome = () => {
     pickedSort,
     drugRecomendations,
     resultCameEmpty,
+    emptyInventory,
     currentDrugToDelete,
+    hasScrolledToBottom,
     disableDeleteFailedMessage,
     disableUpdateMessage,
     toggleMore,

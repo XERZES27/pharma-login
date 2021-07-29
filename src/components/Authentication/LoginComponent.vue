@@ -49,7 +49,7 @@ export default {
     document.querySelector("body").setAttribute("style", "background:#a3a1a1");
   },
   beforeUnmount() {
-    document.querySelector("body").setAttribute("style", "background:#ffffff");
+    document.querySelector("body").setAttribute("style", "background:#FBFEFF");
   },
   
 

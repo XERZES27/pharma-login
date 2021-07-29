@@ -1,7 +1,7 @@
 <template>
   <section id="inventory">
     <div class="container-lg">
-      <div class="row bg-light align-items-center text-start mb-4">
+      <div class="row align-items-center text-start mb-4" id="Heading">
         <div
           class="col-md-12 py-4 ps-5 display-4"
           style="font-family: 'Times New Roman', serif"
@@ -670,6 +670,9 @@ export default {
 </script>
 
 <style>
+#Heading {
+  background-color: #edf2fa;
+}
 .drag-area {
   border: 2px dashed #505050;
   height: 500px;
