@@ -88,7 +88,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .passwordeye span {
   margin-top: 20px;
   font-style: italic;
