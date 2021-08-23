@@ -2,9 +2,9 @@
   <section id="inventoryHome">
     <div class="container-md" v-scroll="handleScroll">
       <!-- Confirm Delete Modal -->
-      <div
+      <div class="modal fade"
         ref="confirmDeleteModalRef"
-        class="modal fade"
+        
         id="confirmDelete"
         tabindex="-1"
         aria-labelledby="confirmDeleteLabel"
@@ -823,16 +823,15 @@
           </p>
         </div>
       </div>
-      <div v-if="!hasScrolledToBottom" class="col-md-11 mb-4">
+      <div v-if="!hasScrolledToBottom && inventoryList.length!==0" class="col-md-11 mb-4">
         <div
-        class="spinner-border text-info"
-        style="width: 3rem; height: 3rem"
-        role="status"
-      >
-        <span class="visually-hidden">Loading...</span>
+          class="spinner-border text-info"
+          style="width: 3rem; height: 3rem"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
-      </div>
-      
     </div>
   </section>
 </template>

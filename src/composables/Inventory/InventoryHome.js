@@ -20,6 +20,12 @@ import {
   validatePrescriptionRequired,
   validateCountryOfOrigin,
 } from "../../models/drug.js";
+// const io = require("socket.io-client");
+// const socket = io("http://localhost:5000/",{
+//   path: "/socket.io/",
+//   extraHeaders: {
+//   }
+// });
 
 const inventoryHome = () => {
   const initialCreateDrugPhase = ref(true);
@@ -549,7 +555,7 @@ const inventoryHome = () => {
           inventoryList.value[index]["deleteSuccess"] = true;
           setTimeout(() => {
             inventoryList.value.splice(index, 1);
-          }, 4000);
+          }, 2000);
         }
       })
       .catch((error) => {
