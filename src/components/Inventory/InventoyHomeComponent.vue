@@ -441,15 +441,8 @@
       </div>
       <div class="row d-flex justify-content-end mt-5 mb-5">
         <div
-          class="
-            col-md-11
-            mt-md-0 mt-2
-            d-flex
-            border border-3
-            rounded
-            justify-content-between
-            py-1
-            ps-3
+          class="col-md-11 mt-md-0 mt-2 d-flex  border border-3  rounded
+            justify-content-between  align-items-end py-1 ps-3
           "
           id="Heading"
         >
@@ -458,7 +451,7 @@
             style="font-family: 'Times New Roman', serif"
             >Drugs Sorted {{ pickedSort }}</span
           >
-          <div class="d-inline me-4">
+          <div class="d-inline me-4 mb-2">
             <div class="d-inline me-2">
               <input
                 type="radio"
@@ -638,10 +631,10 @@
                   <div v-if="inventory['toggleMore']">
                     <div class="mb-2">
                       <div class="row">
-                        <p class="fs-5 col-8 col-md-3">
+                        <p class="fs-5 col-6 col-lg-3 ">
                           Requries Prescription :
                         </p>
-                        <div class="col-1 ps-0">
+                        <div class="col-1 ps-0 ">
                           <input
                             class="
                               form-check-input
@@ -858,7 +851,7 @@ export default {
           el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
           el.target.scrollingElement.scrollHeight
         ) {
-          console.log("has reached the bottom");
+          console.log("has reached the bottom")
           this.getInventory("Load");
           this.hasScrolledToBottom = true;
         }
@@ -1022,7 +1015,7 @@ input[id="Edit-Drug-Switch"] {
   height: 0;
   width: 0;
   visibility: hidden;
-  margin-top: -38px;
+  margin-top: 6px;
   display: inline-block;
 }
 

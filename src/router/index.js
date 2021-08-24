@@ -7,6 +7,7 @@ import UpdateProfile from "../views/Profile/UpdateProfile.vue";
 import CreateInventory from "../views/Inventory/CreateInventory.vue";
 import InventoryHome from "../views/Inventory/InventoryHome.vue";
 import InventoryHelp from "../views/Inventory/InventoryHelp"
+import ReviewHome from "../views/Review/ReviewHome.vue"
 import store from "../store";
 
 const routes = [
@@ -55,6 +56,11 @@ const routes = [
         path: "/inventoryHelp",
         name: "InventoryHelp",
         component: InventoryHelp
+      },
+      {
+        path:"/review",
+        name:"Review",
+        component:ReviewHome
       }
     ]
   },

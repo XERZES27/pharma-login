@@ -120,7 +120,6 @@ const getRecommendations = (query) => {
         resolve(response.data);
       })
       .catch((error) => {
-        console.log(error.response);
         if (errorMiddleWare(error)) {
           resolve();
           return;

@@ -5,6 +5,7 @@ import store from '../store';
 
 const errorMiddleWare = (error)=>{
     let hasError = false;
+    if(error.message==="Network Error") return true
     if(error.response.data.status){
         let status = error.response.data.status;
         if(status=="Invalid Token"){

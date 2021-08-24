@@ -14,13 +14,13 @@
             <div id="main-nav" class="collapse navbar-collapse justify-content-end align-bottom">
                 <ul class="navbar-nav">
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a href="#" class="nav-link">Inventory</a>
+                        <a href="#" @click="routeToInventory" class="nav-link">Inventory</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
                         <a href="#" class="nav-link">Notifications</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a class="nav-link" href="#" >Reviews</a>
+                        <a href="#" @click="routeToReview" class="nav-link"  >Reviews</a>
                     </li>
                    
                     <li class="nav-item dropdown me-3 fs-5  fw-light">
@@ -46,6 +46,14 @@
 import "bootstrap/dist/css/bootstrap.min.css"
 import 'bootstrap';
 export default {
+    methods:{
+        routeToInventory(){
+            this.$router.push({name:"InventoryHome"})
+        },
+        routeToReview(){
+            this.$router.push({name:"Review"})
+        }
+    }
 
 }
 </script>

@@ -58,7 +58,7 @@ export default createStore({
         `hasProfile`,
         `${false}`
       );
-      state.hasProfile = hasProfile;
+      state.hasProfile = false;
     },
   },
   actions: {
