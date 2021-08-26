@@ -372,26 +372,29 @@ const inventoryHome = () => {
       descriptionError.value = "Field Is Required";
       hasErrors = true;
     }
+    const drug = DrugModel([
+      nameModel.value,
+      Number(priceModel.value),
+      Number(amountInStockModel.value),
+      requiresPrescriptionModel.value,
+      descriptionModel.value,
+      brandNameModel.value === "" ? null : brandNameModel.value,
+      countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
+    ]);
+    if(drug ===false){
+      hasErrors = true;
+      }
     if (!hasErrors) {
       createDrugIsSuccessfull.value = false;
       initialCreateDrugPhase.value = false;
       isProcessingCreateDrugPhase.value = true;
       createDrug(
-        DrugModel([
-          nameModel.value,
-          Number(priceModel.value),
-          Number(amountInStockModel.value),
-          requiresPrescriptionModel.value,
-          descriptionModel.value,
-          brandNameModel.value === "" ? null : brandNameModel.value,
-          countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
-        ])
+        drug
       )
         .then((response) => {
           createDrugIsSuccessfull.value = true;
           initialCreateDrugPhase.value = true;
           isProcessingCreateDrugPhase.value = false;
-          console.log(response.data);
         })
         .catch((error) => {
           isProcessingCreateDrugPhase.value = false;
@@ -405,12 +408,14 @@ const inventoryHome = () => {
             if (errKeys.includes("validationError"))
               createDrugError.value = "Validation Errors Occured In Server";
           } else if (error.status === "drug is required") {
-            createDrugError.value = "Something went while data was being sent";
+            createDrugError.value = "Something went wrong while data was being sent";
           } else {
             console.log(error);
             createDrugError.value = "Please Check Your Connection";
           }
         });
+    }else{
+      createDrugError.value = "An Error In Validation";
     }
   };
 

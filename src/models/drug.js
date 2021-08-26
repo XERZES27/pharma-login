@@ -4,7 +4,7 @@ const validateDrugName = (name) => {
 };
 
 const validatePrice = (price) => {
-  if (!price) return false;
+  if (price===undefined || price===null ) return false;
   var truePrice = Number(price);
   if (Number.isNaN(truePrice)) return false;
   if (truePrice > 0 && truePrice < 100000) return true;
@@ -12,7 +12,7 @@ const validatePrice = (price) => {
 };
 
 const validateInStockAmount = (InStockAmount) => {
-  if (!InStockAmount) return false;
+  if (InStockAmount===undefined || InStockAmount===null) return false;
   var stockAmount = Number(InStockAmount);
   if (Number.isNaN(stockAmount)) return false;
   if (
@@ -31,7 +31,7 @@ const validatePrescriptionRequired = (prescriptionRequired) => {
 };
 
 const validateDrugDescription = (drugDescription) => {
-  if (!drugDescription) return false;
+  if (drugDescription===undefined || drugDescription===null) return false;
   if (500 > drugDescription.length && drugDescription.length > 10) return true;
   else return false;
 };
@@ -136,8 +136,10 @@ const DrugModels = (rows) => {
 
 const DrugModel = (row) => {
   if (validateRow(row) === true) {
+    console.log("here")
     return drugModel(row);
   } else {
+    console.log("over here")
     return false;
   }
 };
