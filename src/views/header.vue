@@ -17,7 +17,7 @@
                         <a href="#" @click="routeToInventory" class="nav-link">Inventory</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a href="#" class="nav-link">Notifications</a>
+                        <a href="#" @click="routeToNotification" class="nav-link">Notifications</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
                         <a href="#" @click="routeToReview" class="nav-link"  >Reviews</a>
@@ -30,7 +30,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                           <li><a class="dropdown-item" href="#">Edit Profile</a></li>
                           <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item text-danger" href="#" >Log Out</a></li>
+                          <li><a @click="logout" class="dropdown-item text-danger" href="#" >Log Out</a></li>
                         </ul>
                       </li>
                 </ul>
@@ -45,6 +45,7 @@
 <script>
 import "bootstrap/dist/css/bootstrap.min.css"
 import 'bootstrap';
+import store from '../store';
 export default {
     methods:{
         routeToInventory(){
@@ -52,6 +53,14 @@ export default {
         },
         routeToReview(){
             this.$router.push({name:"Review"})
+        },
+        routeToNotification(){
+            this.$router.push({name:"Notification"})
+        },
+        logout(){
+            store.dispatch("logout").then((_)=>{
+                this.$router.push({name:"Auth"})
+            })
         }
     }
 

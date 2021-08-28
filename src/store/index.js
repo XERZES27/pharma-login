@@ -15,15 +15,15 @@ export default createStore({
       sessionStorage.setItem(`token`, `${token}`);
       sessionStorage.setItem(
         `deviceIsKnown`,
-        `${true}`
+        true
       );
       sessionStorage.setItem(
         `tokenIsValid`,
-        `${true}`
+        true
       );
       sessionStorage.setItem(
         `hasProfile`,
-        `${hasProfile}`
+        hasProfile
       );
       state.id = id;
       state.token = token;
@@ -35,28 +35,28 @@ export default createStore({
     addMachineId(state, machineId) {
       const sessionMachineId = sessionStorage.setItem(
         `machineId`,
-        `${machineId}`
+        machineId
       );
       state.machineId = machineId;
     },
     setDeviceFalse(state) {
       const sessionDeviceIsKnown = sessionStorage.setItem(
         `deviceIsKnown`,
-        `${false}`
+        false
       );
       state.deviceIsKnown = false;
     },
     setTokenFalse(state) {
       const sessionTokenIsValid = sessionStorage.setItem(
         `tokenIsValid`,
-        `${false}`
+        false
       );
       state.tokenIsValid = false;
     },
     setHasProfileFalse(state) {
       const sessionHasProfile = sessionStorage.setItem(
         `hasProfile`,
-        `${false}`
+        false
       );
       state.hasProfile = false;
     },
@@ -94,6 +94,13 @@ export default createStore({
         resolve();
       });
     },
+    logout(context){
+      return new Promise((resolve,reject)=>{
+        context.commit("setTokenFalse");
+        context.commit("setHasProfileFalse");
+        resolve();
+      })
+    }
   },
   getters: {
     getPrerequisites: (state) => {

@@ -58,6 +58,7 @@ const review = () => {
       .then((response) => {
         reviews.value = response.data;
         preloadReview();
+        pageNumber += 1;
       })
       .catch((error) => console.log(error));
   });
@@ -149,7 +150,7 @@ const review = () => {
         el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
         el.target.scrollingElement.scrollHeight
       ) {
-        this.hasScrolledToBottom = true;
+        hasScrolledToBottom = true;
         getReviews("load");
       }
     }

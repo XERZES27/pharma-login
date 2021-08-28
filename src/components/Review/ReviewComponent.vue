@@ -142,8 +142,8 @@
                 {{review["productName"]}}
               </p>
               <div class="ms-3 d-inline">
-                <i v-for="(rating, ind) in review['rating']" :key="ind" class="bi bi-star-fill text-warning d-inline"></i>
-                <i v-for="(rating, ind) in (5-review['rating'])" :key="ind" class="bi bi-star text-secondary d-inline"></i>
+                <i v-for="(rating, ind) in Math.round(review['rating'])" :key="ind" class="bi bi-star-fill text-warning d-inline"></i>
+                <i v-for="(rating, ind) in (5-Math.round(review['rating']))" :key="ind" class="bi bi-star text-secondary d-inline"></i>
 
               </div>
             </div>

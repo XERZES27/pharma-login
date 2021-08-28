@@ -8,6 +8,7 @@ import CreateInventory from "../views/Inventory/CreateInventory.vue";
 import InventoryHome from "../views/Inventory/InventoryHome.vue";
 import InventoryHelp from "../views/Inventory/InventoryHelp"
 import ReviewHome from "../views/Review/ReviewHome.vue"
+import NotificationHome from "../views/Notification/NotificationHome.vue"
 import store from "../store";
 
 const routes = [
@@ -58,6 +59,11 @@ const routes = [
         component: InventoryHelp
       },
       {
+        path:"/notification",
+        name:"Notification",
+        component:NotificationHome
+      },
+      {
         path:"/review",
         name:"Review",
         component:ReviewHome
@@ -90,7 +96,7 @@ router.beforeEach((to, from, next) => {
 
   let deviceIsKnown, tokenIsValid, hasProfile;
   [tokenIsValid,deviceIsKnown,hasProfile ] = store.getters.getPrerequisites;
-  console.log(tokenIsValid,deviceIsKnown,hasProfile,"router")
+  // console.log(tokenIsValid,deviceIsKnown,hasProfile,"router")
   if (
     to.name !== "CreateProfile" &&
     deviceIsKnown===true &&
