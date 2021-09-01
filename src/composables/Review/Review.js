@@ -105,7 +105,7 @@ const review = () => {
     if (!reply.length >= 0 || !reply.length <= 500)
       reviews.value[index]["replyError"] =
         "Reply Must Be Less Than 500 Characters";
-    var deleteReply = reply.length === 0;
+    var deleteReply = reply.trim().length === 0;
 
     var replyFunc =
       reviewType.value === "DRUGS" ? replyToDrugReview : replyToPhammacyReview;

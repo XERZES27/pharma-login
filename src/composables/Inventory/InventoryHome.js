@@ -336,7 +336,8 @@ const inventoryHome = () => {
     }
   }
   const getInventory = async (Options="reset") => {
-    if(Options==="reset")pageNumber = 0
+    if(Options==="reset")pageNumber = 0;
+    
     emptyInventory.value = "";
     if (pickedSort.value == "Alphabetically") {
       getDrugsAlphabetically(pageNumber)

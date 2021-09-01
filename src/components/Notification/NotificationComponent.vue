@@ -82,8 +82,8 @@
           "
           style="font-family: 'Times New Roman', serif"
         >
-          <span class="fs-1">Notifications</span>
-          <div class="d-inline me-4">
+          <span class="fs-1 pe-3">Notifications</span>
+          <div class="d-inline me-4 d-flex  justify-content-end">
             <div class="d-inline me-2">
               <input
                 type="radio"
