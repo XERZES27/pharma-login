@@ -60,7 +60,7 @@ const inventoryHome = () => {
 
   watch(nameModel, (newValue, oldValue) => {
     if (newValue !== "") {
-      if (validatePrice(newValue)) nameError.value = "";
+      if (validateDrugName(newValue)) nameError.value = "";
     }
   });
 
@@ -415,9 +415,10 @@ const inventoryHome = () => {
             createDrugError.value = "Please Check Your Connection";
           }
         });
-    }else{
-      createDrugError.value = "An Error In Validation";
     }
+    // else{
+    //   createDrugError.value = "An Error In Validation";
+    // }
   };
 
   const performUpdate = async (index) => {

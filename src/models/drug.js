@@ -136,10 +136,8 @@ const DrugModels = (rows) => {
 
 const DrugModel = (row) => {
   if (validateRow(row) === true) {
-    console.log("here")
     return drugModel(row);
   } else {
-    console.log("over here")
     return false;
   }
 };

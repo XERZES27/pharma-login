@@ -323,7 +323,6 @@
         <div
           class="col-md-12 py-4 ps-5 display-4"
           id="Heading"
-          style="font-family: 'Times New Roman', serif"
         >
           Inventory
         </div>
@@ -362,7 +361,7 @@
           ></i>
         </div>
       </div>
-      <div id="floating-search" v-click-away="onClickAway" class="mb-3">
+      <div id="floating-search" v-click-away="onClickAway" class="mb-5">
         <div class="row d-flex align-items-center justify-content-end">
           <div class="col-md-11">
             <div
@@ -439,19 +438,18 @@
           </div>
         </div>
       </div>
-      <div class="row d-flex justify-content-end mt-5 mb-5">
+      <div class="row d-flex justify-content-end mt-5 mb-5 mx-md-1">
         <div
-          class="col-md-11 mt-md-0 mt-2 d-flex  border border-3  rounded
-            justify-content-between  align-items-end py-1 ps-3
+          class="col-md-11 mt-md-0 mt-2 d-flex  
+            justify-content-between  align-items-center py-1 ps-3
           "
           id="Heading"
         >
-          <span
-            class="fs-3 d-inline pt-4"
-            style="font-family: 'Times New Roman', serif"
-            >Drugs Sorted {{ pickedSort }}</span
+          <p
+            class="fs-3 d-inline pt-4 d-flex "
+            >Drugs Sorted {{ pickedSort }}</p
           >
-          <div class="d-inline me-4 mb-2">
+          <div class="d-inline me-4  ">
             <div class="d-inline me-2">
               <input
                 type="radio"
@@ -483,6 +481,9 @@
               >
             </div>
           </div>
+        </div>
+        <div class=" col-md-11 border-bottom border-dark border-3 pt-3">
+
         </div>
       </div>
       <div
@@ -557,14 +558,18 @@
             }"
           >
             <div
-              class="card-header border-bottom-0 mb-2"
+              class="card-header border-bottom-0 mb-2
+               d-flex
+            justify-content-between
+              "
               id="Card-Header-Inventory"
             >
               <h5 class="pt-3">Name: {{ inventory["name"] }}</h5>
+              <p class="pt-3">Created: {{inventory["creationDate"]}}</p>
             </div>
             <div class="row">
               <div class="col">
-                <div class="card-body text-start ps-4">
+                <div class="card-body text-start ps-4" id="inverntory-body">
                   <p class="fs-5">
                     Brand-Name :<strong class="ps-3 fs-6 text-secondary">{{
                       inventory["brandName"]
@@ -958,14 +963,20 @@ export default {
 }
 #Heading {
   background-color: #edf2fa;
+  font-family: Times New Roman, serif ;
+
 }
 #Add-Drug-Input {
   outline: none;
   box-shadow: none;
 }
+#inverntory-body{
+  font-family: Times New Roman, serif ;
+}
 #inventory-card {
   background-color: #fbfcff;
   box-shadow: -5px 5px 8px 1px #d2e1e6;
+  /* font-family: Times New Roman, serif ; */
 }
 #search-bar {
   background: #fbfeff;

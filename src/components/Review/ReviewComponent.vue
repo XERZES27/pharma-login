@@ -22,7 +22,6 @@
             justify-content-between
             align-items-end
           "
-          style="font-family: 'Times New Roman', serif"
         >
           <span>Reviews</span>
           <div class="d-inline me-4">
