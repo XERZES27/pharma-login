@@ -60,13 +60,19 @@ export default createStore({
       );
       state.hasProfile = false;
     },
+    setHasProfileTrue(state) {
+      const sessionHasProfile = sessionStorage.setItem(
+        `hasProfile`,
+        true
+      );
+      state.hasProfile = true;
+    },
   },
   actions: {
     setResponseData(context, {id, token, hasProfile,machineId}) {
       // console.log(token)
       return new Promise((resolve, reject) => {
         context.commit("addResponseData", {"id":id, "token":token, "hasProfile":hasProfile,"machineId":machineId});
-        
         resolve();
       });
     },
@@ -94,6 +100,12 @@ export default createStore({
         resolve();
       });
     },
+    allowProfile(context){
+      return new Promise((resolve, reject) => {
+        context.commit("setHasProfileTrue");
+        resolve();
+      });
+    },
     logout(context){
       return new Promise((resolve,reject)=>{
         context.commit("setTokenFalse");
@@ -104,7 +116,6 @@ export default createStore({
   },
   getters: {
     getPrerequisites: (state) => {
-      
       return [state.tokenIsValid,state.deviceIsKnown,state.hasProfile];
     },
     getMachineId:(state)=>{

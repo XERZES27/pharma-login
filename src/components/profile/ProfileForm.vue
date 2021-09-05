@@ -1,91 +1,5 @@
 <template>
-  <div class="main-container container-fluid d-flex align-items-center">
-    <div class="container">
-      <form class="form row justify-content-center align-items-center needs-validation" novalidate>
-        <div
-          class="
-            col-md-8
-            col-lg-6
-            col-xl-5
-            col-sm-10
-            col-11
-            justify-space-around
-            border
-            rounded-3
-            p-3
-            shadow
-            bg-light
-            align-middle
-          "
-        >
-          <div class="text-center text-muted">
-            <h2 class="display-5">Create Profile</h2>
-          </div>
-          <div class="form-group mb-3">
-            <label class="text-muted" for="pharmacyName">Pharmacy Name</label>
-            <input type="text" class="form-control" id="pharmacyName" placeholder="Pharmacy Name" required/>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="flexSwitchCheckChecked"
-              checked
-            />
-            <label class="form-check-label" for="flexSwitchCheckChecked"
-              >Accept Request</label
-            >
-          </div>
-          <div v-if="imagesList.length !== 3" class="form-group mb-3">
-            <label class="text-muted" for="formFile">Choose images of the Pharmacy(max: 3 images)</label>
-            <input
-              class="form-control"
-              type="file"
-              id="formFile"
-              @change="loadImage"
-            />
-            <span v-if="showValidation && imagesList.length === 0" class="text-danger">
-              Please select an image.
-            </span>
-          </div>
-          <div v-if="imagesList.length > 0" class="row gx-1 mb-3 justify-content-around">
-            <div v-for="(img, index) in imagesList" class="col-md-4 col-sm-4 col-xs-6 col-4" :key="index">
-              <div class="image-area">
-                <img class="img-fluid img-thumbnail rounded w-100" :src="img.src" alt="iamge">
-                <span class="remove-image" style="display: inline; cursor: pointer;" @click="handleRemove(index)">&#215;</span>
-              </div>
-            </div>
-          </div>
-          <div class="form-group mb-3">
-            <label class="text-muted" for="locationTextarea">Loction in words</label>
-            <textarea class="form-control" id="locationTextarea" rows="3" style="resize: none;" placeholder="e.g. Megenana 20m below zefmesh" required/>
-          </div>
-          <p>Location 📍 : <span v-if="!location" class="fw-lighter" ref="locationValidation">Please choose the location of the Pharmacy</span>
-            <span v-if="location" class="text-success fst-italic fw-bolder">
-              {{location.latitude}}, {{location.longitude}}
-            </span>
-          </p>
-          <div class="d-grid mb-3">
-            <button class="btn btn-success" type="button" @click="mapToggle">Choose Pharmacy location</button>
-          </div>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" class="btn btn-info text-light btn-labeled">
-                  <span class="btn-label">✓︁ </span>Create
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-      <div ref="toastDiv" id="liveToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            Please select an image lessthan 2MB.
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-    </div>
+  <div class="container-md">
     <div
       ref="modal"
       class="modal fade"
@@ -96,7 +10,7 @@
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Modal title</h5>
+            <h5 class="modal-title">Crop Image</h5>
             <button
               type="button"
               class="btn-close"
@@ -116,8 +30,17 @@
             />
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="modalToggle" >Cancel</button>
-            <button type="button" class="btn btn-primary" @click="crop">Crop</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              @click="modalToggle"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" @click="crop">
+              Crop
+            </button>
           </div>
         </div>
       </div>
@@ -129,10 +52,14 @@
       tabindex="-1"
       role="dialog"
     >
-      <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down">
+      <div
+        class="
+          modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down
+        "
+      >
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Modal title</h5>
+            <h5 class="modal-title">Select Location</h5>
             <button
               type="button"
               class="btn-close"
@@ -145,13 +72,224 @@
             <div ref="mapDiv" style="width: 100%; height: 60vh"></div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="mapModal" @click="mapToggle">Cancel</button>
-            <button type="button" class="btn btn-success" @click="mapToggle">DONE!</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="mapModal"
+              @click="mapToggle"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-success" @click="mapToggle">
+              DONE!
+            </button>
           </div>
         </div>
       </div>
     </div>
     <div v-if="active" class="modal-backdrop fade show"></div>
+    <div class="row bg-light align-items-center text-start mb-4">
+      <div class="col-md-12 py-4 ps-5 display-4" id="Heading">
+        Create Profile
+      </div>
+    </div>
+    <div class="row ms-5 d-flex justify-content-center">
+      <div
+        ref="toastDiv"
+        id="liveToast"
+        class="toast col-6 bg-dark text-white"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="d-flex">
+          <div class="toast-body ps-2 mt-1">
+            <strong>Please select an image less than 2MB.</strong>
+          </div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+    </div>
+    <div class="row d-flex align-items-center justify-content-end mt-2 mb-5">
+      <form
+        class="col-md-11 form needs-validation"
+        @submit.prevent
+        novalidate="true"
+        @submit="submit"
+        ref="profileForm"
+      >
+        <div v-if="loading === false" class="border rounded-3 p-3 align-middle">
+          <div class="form-group mb-4">
+            <span v-if="errorMessage !== ''" class="row text-danger mt-2 mb-2">
+              <strong>{{ errorMessage }}</strong>
+            </span>
+            <div class="row">
+              <span class="mb-1"><strong>Name</strong></span>
+            </div>
+            <div class="row ms-1">
+              <input
+                v-model="nameModel"
+                maxlength="30"
+                type="text"
+                pattern="[A-Za-z0-9-\x27\s]+"
+                title="Greater than 5 Characters, cannot contain special characters"
+                class="form-control fw-bold border-2 border-bottom"
+                id="pharmacyName"
+                placeholder="Pharmacy Name, Choose Carefully this field Cannot Be Easily Changed"
+                required
+              />
+            </div>
+            <span v-if="nameError !== ''" class="text-danger mt-2 ps-2">
+              <strong
+                >Greater than 5 Characters, cannot contain special
+                characters</strong
+              >
+            </span>
+          </div>
+
+          <div v-if="imagesList.length < 3" class="row form-group mb-4">
+            <label class="mb-3" for="formFile"
+              ><strong
+                >Choose images of the Pharmacy(max: 3 images)</strong
+              ></label
+            >
+            <div class="ms-1 upload-btn-wrapper">
+              <button
+                class="form-control btn btn-outline-dark"
+                @click.prevent="rando"
+              >
+                Select Images
+              </button>
+              <input
+                class="form-control"
+                name="myfile"
+                type="file"
+                id="formFile"
+                @change="loadImage"
+              />
+            </div>
+            <span
+              v-if="showValidation && imagesList.length === 0"
+              class="text-danger mt-2 ms-2"
+            >
+              <strong>Please select an image.</strong>
+            </span>
+          </div>
+          <div class="mb-4" v-else>
+            <span class="" for="formFile"
+              ><strong>Pharmacy Images</strong></span
+            >
+          </div>
+          <div
+            v-if="imagesList.length > 0"
+            class="row gx-1 mb-4 justify-content-around"
+          >
+            <div
+              v-for="(img, index) in imagesList"
+              class="col-md-4 col-sm-4 col-xs-6 col-4"
+              :key="index"
+            >
+              <div class="image-area">
+                <img
+                  class="img-fluid img-thumbnail rounded w-100"
+                  :src="img.src"
+                  alt="iamge"
+                />
+                <span
+                  class="remove-image"
+                  style="display: inline; cursor: pointer"
+                  @click="handleRemove(index)"
+                  >&#215;</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="" style="width: 160px">
+              <span class="" for="flexSwitchCheckChecked"
+                ><strong>Accepts Requests</strong></span
+              >
+            </div>
+            <div class="col form-check form-switch ms-3 mb-3 d-inline">
+              <input
+                v-model="acceptsRequestsModel"
+                class="form-check-input"
+                type="checkbox"
+                id="flexSwitchCheckChecked"
+                checked
+              />
+            </div>
+          </div>
+          <div class="form-group mb-4">
+            <div class="row">
+              <span class="mb-3"><strong>Location Description</strong></span>
+            </div>
+            <div class="row ms-1">
+              <input
+                maxlength="100"
+                pattern="[A-Za-z0-9-\x27\s]+"
+                title="Greater than 5 Characters, cannot contain special characters"
+                v-model="locationDescriptionModel"
+                class="
+                  form-control
+                  fw-bold
+                  border-2
+                  border-start-0
+                  border-end-0
+                  border-top-0
+                  border-bottom
+                "
+                placeholder="e.g. Megenana 20m below zefmesh"
+                required
+              />
+            </div>
+            <span
+              v-if="locationDescriptionError !== ''"
+              class="text-danger mt-2 ps-2"
+            >
+              <strong
+                >Greater than 5 Characters, cannot contain special
+                characters</strong
+              >
+            </span>
+          </div>
+          <p>
+            <strong>Location 📍 : </strong>
+            <span v-if="!location" class="" ref="locationValidation"
+              ><strong>Please choose the location of the Pharmacy</strong></span
+            >
+            <span v-if="location" class="text-success fst-italic fw-bolder">
+              {{ location.latitude }}, {{ location.longitude }}
+            </span>
+          </p>
+          <div class="d-grid mb-3">
+            <button class="btn btn-success" type="button" @click="mapToggle">
+              Choose Pharmacy location
+            </button>
+          </div>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button
+              type="submit"
+              class="btn btn-dark text-light btn-labeled px-4"
+            >
+              <span class="btn-label">✓︁ </span>Create Profile
+            </button>
+          </div>
+        </div>
+        <div v-else>
+          <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -160,242 +298,28 @@
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useGeolocation } from '@/composables/Profile/useGeolocation.js'
-import { Loader } from '@googlemaps/js-api-loader';
-import { Toast } from 'bootstrap'
 
 const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
-let markers = [];
+
+import { profile } from "../../composables/Profile/CreateProfile";
 
 export default {
+  methods: {
+    rando() {
+      console.log("here");
+    },
+  },
   components: {
     Cropper,
   },
   setup() {
-    const croppedImage = ref(null);
-    const cropper = ref(null);
-    const toastDiv = ref(null);
-    const active = ref(false);
-    const activeMap = ref(false);
-    const image = ref({
-      src: null,
-      type: null,
-      name: null,
-    });
-    const dialog = ref(false);
-    const acceptReq = ref(true);
-    const showMap = ref(false);
-    const imagesList = ref([]);
-    const model = ref({
-      username: "",
-    });
-    const loading = ref(false);
-    const rules = {
-      username: [
-        {
-          required: true,
-          message: "Username is required",
-          trigger: "blur",
-        },
-        {
-          min: 4,
-          message: "Username length should be at least 5 characters",
-          trigger: "blur",
-        },
-      ],
-    };
-    const location = ref(null);
-    const mapDiv = ref(null);
-    let map = ref(null);
-    let clickListener = null;
-    let locationValidation = ref(null);
-    const otherPos = ref(null);
-    const imageicn = ref(null);
-    const showValidation = ref(false);
-
-    //* On mounted map is initialized with and a click listener is attached.
-    onMounted(async () => {
-      await loader.load()
-      map.value = new google.maps.Map(mapDiv.value, {
-        center: currPos.value,
-        zoom: 16
-      })
-      clickListener = map.value.addListener(
-        'click',
-        ({ latLng: { lat, lng } }) => {
-          otherPos.value = { lat: lat(), lng: lng() }
-          console.log(otherPos.value);
-          addMarker(otherPos.value);
-        }
-      )
-      //* Custom marker icon for the map.
-      imageicn.value = {
-        url: "https://i.im.ge/2021/07/21/seFIh.png",
-        // This marker is 20 pixels wide by 32 pixels high.
-        size: new google.maps.Size(33, 37),
-        // The origin for this image is (0, 0).
-        origin: new google.maps.Point(0, 0),
-        // The anchor for this image is the base of the flagpole at (0, 37).
-        anchor: new google.maps.Point(16, 40),
-      };
-
-      //* For Form Valdiation.
-      var forms = document.querySelectorAll('.needs-validation');
-      Array.prototype.slice.call(forms)
-        .forEach(function (form) {
-          form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-              event.preventDefault()
-              event.stopPropagation()
-            }
-
-            form.classList.add('was-validated')
-            locationValidation.value.classList.add('text-danger');
-            showValidation.value = true;
-          }, false)
-        });
-    });
-
-    //* On unmounted the map click listner is removed
-    onUnmounted(async () => {
-      if (clickListener) clickListener.remove()
-    });
-
-    const loader = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-    });
-
-    //* Get current location of the user to center his/her map
-    const { coords } = useGeolocation();
-    const currPos = computed(() => ({
-      lat: coords.value.latitude,
-      lng: coords.value.longitude
-    }));
-
-    //* Shows error toast.
-    const showToast = () => {
-      var toast = new Toast(toastDiv.value)
-      toast.show()
-    }
-
-    //* Add marker of the pharmacy location on the map.
-    const addMarker = (coords) => {
-      if(markers.length !== 0) deleteMarker()
-      const marker = new google.maps.Marker({
-        position: coords,
-        map: map.value,
-        icon: imageicn.value,
-        title: 'aman'
-      })
-      markers.push(marker);
-      location.value = {
-        latitude: coords.lat,
-        longitude: coords.lng
-      }
-      console.log(location.value);
-    }
-
-    const deleteMarker = () => {
-      for (let i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
-      }
-      markers = [];
-    }
-
-    //* Toggles the crop modal.
-    const modalToggle = () => {
-      const body = document.querySelector("body");
-      active.value = !active.value;
-      active
-        ? body.classList.add("modal-open")
-        : body.classList.remove("modal-open");
-    };
-
-    //* Toggle the map modal.
-    const mapToggle = () => {
-      const body = document.querySelector("body");
-      activeMap.value = !activeMap.value;
-      active
-        ? body.classList.add("modal-open")
-        : body.classList.remove("modal-open");
-    };
-
-    //* Load the images selected and give it to the cropper modal.
-    const loadImage = (event) => {
-      const files = event.target.files;
-
-      if (beforeImageAccept(files[0])) {
-        console.log(files);
-        modalToggle();
-        showMap.value = true;
-        // Ensure that you have a file before attempting to read it
-        if (files) {
-          // 1. Revoke the object URL, to allow the garbage collector to destroy the uploaded before file
-          if (image.src) {
-            URL.revokeObjectURL(image.src);
-          }
-          // 2. Create the blob link to the file to optimize performance:
-          const blob = URL.createObjectURL(files[0]);
-          
-          image.value = {
-            src: blob,
-            type: files[0].type,
-            name: files[0].name
-          };
-        }
-      }
-    };
-
-    //* Check if the image size is appropriate(not too big).
-    const beforeImageAccept = (file) => {
-      const isSized = file.size / 1024 / 1024 < 2;
-      if (!isSized) {
-        showToast();
-      }
-      return isSized;
-    };
-
-    //* Crop the image and preview it.
-    const crop = () => {
-      const { canvas } = cropper.value.getResult();
-      croppedImage.value = canvas.toDataURL();
-      imagesList.value.push({
-        name: image.value.name,
-        type: image.value.type,
-        src: canvas.toDataURL(),
-      });
-      modalToggle();
-    };
-
-    const handleRemove = (place) => {
-      imagesList.value.splice(place, 1);
-    };
-
-    const simulateSubmit = () => {
-      return new Promise((resolve) => {
-        setTimeout(resolve, 800);
-      });
-    };
-
-    const submit = async () => {
-      let valid = await $refs.form.validate();
-      if (!valid) {
-        return;
-      }
-      loading = true;
-      await simulateSubmit();
-      loading = false;
-      if (
-        model.username === validCredentials.username &&
-        model.password === validCredentials.password
-      ) {
-        $message.success("Submit successfull");
-      } else {
-        $message.error("Username or password is invalid");
-      }
-    };
-
-    return {
+    const {
+      profileForm,
+      nameModel,
+      nameError,
+      acceptsRequestsModel,
+      locationDescriptionModel,
+      locationDescriptionError,
       image,
       dialog,
       acceptReq,
@@ -403,6 +327,7 @@ export default {
       imagesList,
       model,
       loading,
+      errorMessage,
       rules,
       crop,
       loadImage,
@@ -421,13 +346,61 @@ export default {
       deleteMarker,
       location,
       showToast,
-      showValidation
+      showValidation,
+    } = profile();
+    return {
+      profileForm,
+      nameModel,
+      nameError,
+      acceptsRequestsModel,
+      locationDescriptionModel,
+      locationDescriptionError,
+      image,
+      dialog,
+      acceptReq,
+      showMap,
+      imagesList,
+      model,
+      loading,
+      errorMessage,
+      rules,
+      crop,
+      loadImage,
+      handleRemove,
+      submit,
+      active,
+      activeMap,
+      modalToggle,
+      mapToggle,
+      cropper,
+      croppedImage,
+      currPos,
+      mapDiv,
+      locationValidation,
+      toastDiv,
+      deleteMarker,
+      location,
+      showToast,
+      showValidation,
     };
   },
 };
 </script>
 
 <style scoped>
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.upload-btn-wrapper input[type="file"] {
+  font-size: 58px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
 .main-container {
   height: 100vh;
   background-color: rgb(185, 185, 185);
@@ -438,31 +411,36 @@ export default {
   background: #333;
 }
 .remove-image {
-display: none;
-position: absolute;
-top: -5px;
-right: -5px;
-border-radius: 5em;
-padding: 2px 6px 3px;
-text-decoration: none;
-font: 700 21px/20px sans-serif;
-background: #555;
-border: 3px solid #fff;
-color: #FFF;
-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  display: none;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  border-radius: 5em;
+  padding: 2px 6px 3px;
+  text-decoration: none;
+  font: 700 21px/20px sans-serif;
+  background: #555;
+  border: 3px solid #fff;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   -webkit-transition: background 0.5s;
   transition: background 0.5s;
 }
 .remove-image:hover {
- background: #E54E4E;
+  background: #e54e4e;
   padding: 3px 7px 5px;
   top: -6px;
-right: -6px;
+  right: -6px;
 }
 .remove-image:active {
- background: #E54E4E;
+  background: #e54e4e;
   top: -5px;
-right: -6px;
+  right: -6px;
+}
+
+#Heading {
+  background-color: #edf2fa;
+  font-family: Times New Roman, serif;
 }
 </style>
