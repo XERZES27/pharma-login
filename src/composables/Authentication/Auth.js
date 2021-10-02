@@ -1,10 +1,10 @@
-const axios = require('axios');
-import {v4 as uuidv4} from 'uuid';
-import {login} from '../../repository/authRepository'
-import {useStore} from 'vuex';
-import { ref, watch,onMounted } from "vue";
-import {setCookie,getCookie} from '../../repository/cookieRepository'
-import router from '../../router';
+const axios = require("axios");
+import { v4 as uuidv4 } from "uuid";
+import { login } from "../../repository/authRepository";
+import { useStore } from "vuex";
+import { ref, watch, onMounted } from "vue";
+import { setCookie, getCookie } from "../../repository/cookieRepository";
+import router from "../../router";
 
 function validateEmail(email) {
   const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -44,7 +44,7 @@ function getPasswordError(password) {
 }
 
 const formValidation = () => {
-    const store = useStore();
+  const store = useStore();
   const email = ref("");
   const password = ref("");
   const termsAndConditions = ref(false);
@@ -53,13 +53,7 @@ const formValidation = () => {
   const termsAndConditionsError = ref("");
   var machineId = getCookie("machineId");
 
-  onMounted(() => {
-    
-    
-    
-    
-    
-  })
+  onMounted(() => {});
 
   watch(email, () => {
     emailError.value = "";
@@ -71,48 +65,38 @@ const formValidation = () => {
     termsAndConditionsError.value = "";
   });
   const submitForm = () => {
-
     const emailHasError = getEmailError(email);
     const passwordHasError = getPasswordError(password);
     if (!emailHasError && !passwordHasError && termsAndConditions.value) {
-      login(email.value,password.value,machineId)
-      .then((responseData)=> {
-
-        if(responseData['id']&&responseData['token']){
-          store.dispatch("setResponseData",
-          {"id":responseData['id'],
-          "token":responseData['token'],
-          "hasProfile":responseData['hasProfile'],
-          "machineId":machineId
-        }).then(()=>{
-            if(!responseData['hasProfile']){
-              // TODO forward to new page
-          // TODO create setup profile page
-          
-                router.replace({"name":"CreateProfile"})
-            }
-            else{
-              router.replace({"name":"InventoryHome"})
-
-            }
-          })
-          
-          // TODO integrate google maps
-          
-        }
-      })
-      .catch( (errorData) =>{
-         if(errorData['emailError']){
-          emailError.value = errorData['emailError'];
-        }
-        else if(errorData['passwordError']){
-          passwordError.value = errorData['passwordError'];
-        }
-        else{
-          emailError.value =  "Unknown Error, Please Try Again";
-        }
-      }); 
-      return
+      login(email.value, password.value, machineId)
+        .then((responseData) => {
+          if (responseData["id"] && responseData["token"]) {
+            store
+              .dispatch("setResponseData", {
+                id: responseData["id"],
+                token: responseData["token"],
+                hasProfile: responseData["hasProfile"],
+                machineId: machineId,
+              })
+              .then(() => {
+                if (!responseData["hasProfile"]) {
+                  router.replace({ name: "CreateProfile" });
+                } else {
+                  router.replace({ name: "InventoryHome" });
+                }
+              });
+          }
+        })
+        .catch((errorData) => {
+          if (errorData["emailError"]) {
+            emailError.value = errorData["emailError"];
+          } else if (errorData["passwordError"]) {
+            passwordError.value = errorData["passwordError"];
+          } else {
+            emailError.value = "Unknown Error, Please Try Again";
+          }
+        });
+      return;
     } else {
       emailError.value = !emailHasError ? "" : emailHasError;
       passwordError.value = !passwordHasError ? "" : passwordHasError;
@@ -121,8 +105,6 @@ const formValidation = () => {
         : "Field is Required";
     }
   };
-
-
 
   return {
     email,

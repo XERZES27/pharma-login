@@ -396,6 +396,7 @@ const inventoryHome = () => {
           createDrugIsSuccessfull.value = true;
           initialCreateDrugPhase.value = true;
           isProcessingCreateDrugPhase.value = false;
+          getInventory();
         })
         .catch((error) => {
           isProcessingCreateDrugPhase.value = false;

@@ -89,6 +89,7 @@ const notification = () => {
     confirmRestockModalRef.value.addEventListener("hidden.bs.modal", function(
       event
     ) {
+      getNotifications("reset");
       setTempValueToDefault();
     });
     confirmDeleteRequestedDrugModalRef.value.addEventListener(

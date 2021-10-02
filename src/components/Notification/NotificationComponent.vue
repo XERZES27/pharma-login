@@ -1,7 +1,6 @@
 <template>
   <section id="Notification">
-    <div
-      class="modal fade"
+    <div class="modal fade confirmRestockModal"
       ref="confirmRestockModalRef"
       id="confirmRestock"
       tabindex="-1"
@@ -84,7 +83,7 @@
                 isProcessing || errorMessage !== '' || successMessage !== ''
               "
               type="button"
-              class="btn btn-success"
+              class="btn btn-success confirmRestockButton"
               @click="confirmRestock()"
             >
               RESTOCK
@@ -93,8 +92,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
+    <div class="modal fade confirmRemoveSubmittedDrugForRequest"
       ref="confirmDeleteRequestedDrugModalRef"
       id="confirmDeleteDrug"
       tabindex="-1"
@@ -173,7 +171,7 @@
                 isProcessing || errorMessage !== '' || successMessage !== ''
               "
               type="button"
-              class="btn btn-danger"
+              class="btn btn-danger confirmDeleteDrugInRequest"
               @click="deleteDrugInRequest()"
             >
               REMOVE
@@ -182,8 +180,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
+    <div class="modal fade searchDrugForSubmit"
       ref="searchDrugModalRef"
       id="searchDrug"
       tabindex="-1"
@@ -202,7 +199,7 @@
                   selectedSearchDrug = '';
                 "
                 v-if="errorMessage !== ''"
-                class="bi bi-arrow-left fs-4 d-inline"
+                class="bi bi-arrow-left fs-4 d-inline backButtonForInvalidDrugSubmit"
               ></i>
               <p class="d-inline">
                 SEARCH DRUG IN INVENTORY MATCHING
@@ -230,6 +227,7 @@
                 class="
                   form-control
                   border border-dark border-top-0 border-bottom-0
+                  searchDrugInputForSubmit
                 "
                 placeholder="Search Drugs"
                 aria-label="Recipient's username"
@@ -257,11 +255,13 @@
                 <div
                   v-for="(recommendation, index) in recommendedDrugs"
                   :key="index"
+                  class="recommendedDrugsForSubmitList"
+                  :class="recommendation['name']+recommendation['brandName']+'DG'"
                 >
                   <div class="row d-flex justify-content-end pt-1">
                     <div class="col-md-12">
                       <div
-                        class="card border border-top-0 border-end-0"
+                        class="card border border-top-0 border-end-0 recommendedDrugForRequestSubmit"
                         type="button"
                         @click="
                           selectedSearchDrug = recommendation;
@@ -306,7 +306,7 @@
               </div>
             </div>
             <div v-if="errorMessage !== ''">
-              <p class="text-danger">
+              <p class="text-danger errorMessageForSubmittedDrugRequest">
                 <strong>{{ errorMessage }}</strong>
               </p>
             </div>
@@ -333,7 +333,7 @@
                 selectedSearchDrug === ''
               "
               type="button"
-              class="btn btn-dark"
+              class="btn btn-dark submitDrugToRequestButton"
               @click="submitDrugToRequest()"
             >
               SUBMIT
@@ -342,8 +342,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
+    <div class="modal fade confirmRequestDenialModal"
       ref="requestDeclineModalRef"
       id="requestDecline"
       tabindex="-1"
@@ -406,7 +405,7 @@
                 isProcessing || errorMessage !== '' || successMessage !== ''
               "
               type="button"
-              class="btn btn-danger"
+              class="btn btn-danger confirmDeclineRequestButton"
               @click="declineRequest()"
             >
               DECLINE REQUEST
@@ -415,8 +414,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
+    <div class="modal fade confirmDeleteDeclineRequest"
       ref="deleteDeclineModalRef"
       id="deleteDecline"
       tabindex="-1"
@@ -471,12 +469,12 @@
             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
               CLOSE
             </button>
-            <button
+            <button 
               :disabled="
                 isProcessing || errorMessage !== '' || successMessage !== ''
               "
               type="button"
-              class="btn btn-success"
+              class="btn btn-success confirmDeleteDeclineRequestButton"
               @click="deleteDecline()"
             >
               APPROVE
@@ -514,7 +512,7 @@
             <div class="d-inline me-2">
               <input
                 type="radio"
-                class="btn-check"
+                class="btn-check toggleToSubscriptions"
                 name="options-outlined"
                 id="primary-outlined"
                 value="Subscriptions"
@@ -530,7 +528,7 @@
             <div class="d-inline">
               <input
                 type="radio"
-                class="btn-check ps-3"
+                class="btn-check ps-3 toggleToRequests"
                 name="options-outlined"
                 id="danger-outlined"
                 value="Requests"
@@ -590,6 +588,7 @@
           v-for="(notification, index) in notifications"
           :key="index"
           class="row d-flex justify-content-center mt-5"
+          :class="notification['name']+notification['brandName']"
         >
           <div
             v-if="loadedNotificationType === 'Subscriptions'"
@@ -650,6 +649,7 @@
                 >
                   <input
                     type="number"
+                    min=1
                     v-model="notification['amountInStockModel']"
                     class="me-2 d-inline"
                     style="
@@ -658,7 +658,7 @@
                       border-radius: 5px;
                     "
                   />
-                  <div @click="restock(index)" type="button" class="d-inline">
+                  <div class="restockButton d-inline" @click="restock(index)" type="button" >
                     <i class="d-inline bi bi-reply-all-fill me-2"></i>
                     <p class="d-inline">Restock</p>
                   </div>
@@ -691,15 +691,15 @@
             >
               <i
                 :class="{
-                  'bi bi-check-circle-fill':
+                  'bi bi-check-square':
                     notification['status'] === 'Completed',
-                  'bi bi-x-lg': notification['status'] === 'Declined',
+                  'bi bi-x-square': notification['status'] === 'Declined',
                   'bi bi-hourglass-split': notification['status'] === 'Pending',
                   'text-success': notification['status'] === 'Completed',
                   'text-info': notification['status'] === 'Pending',
                   'text-danger': notification['status'] === 'Declined',
                 }"
-                class="fs-3"
+                class="fs-3 notificationStatus"
                 >&#160; {{ notification["status"] }}</i
               >
             </div>
@@ -772,6 +772,7 @@
                         bg-dark
                         d-flex
                         justify-content-center
+                        removeSubmittedDrugButton
                       "
                     >
                       <div>
@@ -784,7 +785,7 @@
                     <button
                       @click="showSearchDrugModal(notification)"
                       type="button"
-                      class="btn btn-secondary shadow-none ms-2 px-5 d-inline"
+                      class="btn btn-secondary shadow-none ms-2 px-5 d-inline submitADrug"
                       style="border: none"
                     >
                       SUBMIT A DRUG
@@ -814,7 +815,7 @@
                   <button
                   @click="showDeleteDeclineModal(index)"
                       type="button"
-                      class="btn btn-danger shadow-none mt-2"
+                      class="btn btn-danger shadow-none mt-2 deleteRequestDeclineButton"
                     >
                       Delete Request Decline
                     </button>
@@ -823,7 +824,7 @@
                   <button
                     @click="toggleShowReplyBox(index)"
                     type="button"
-                    class="btn  shadow-none"
+                    class="btn  shadow-none declineRequestButton"
                     :class="{
                       'btn-secondary': notification['decline']===true,
                       'btn-secondary': notification['showReplyBox']===false,
@@ -834,13 +835,13 @@
                   >
                     <div v-if="!notification['showReplyBox']" class="d-inline">
                       <i class="d-inline bi bi-eraser-fill me-2"></i>
-                      <p v-if="notification['decline']" class="d-inline">
+                      <p v-if="notification['decline']" class="d-inline declineType">
                         Edit Decline
                       </p>
-                      <p v-else class="d-inline">Decline Request</p>
+                      <p v-else class="d-inline declineType">Decline Request</p>
                     </div>
                     <div v-else class="d-inline">
-                      <p class="d-inline">Submit Decline</p>
+                      <p class="d-inline declineType">Submit Decline</p>
                     </div>
                   </button>
                 </div>
@@ -864,6 +865,7 @@
                   form-control
                   border-2 border-top-0 border-end-0 border-start-0 border-dark
                   text-dark
+                  declineReplyBox
                 "
                 placeholder="Reasons For Decline"
               />

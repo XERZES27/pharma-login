@@ -14,13 +14,13 @@
             <div id="main-nav" class="collapse navbar-collapse justify-content-end align-bottom">
                 <ul class="navbar-nav">
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a href="#" @click="routeToInventory" class="nav-link">Inventory</a>
+                        <a href="#" @click="routeToInventory" class="nav-link" id="inventoryRouter" >Inventory</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a href="#" @click="routeToNotification" class="nav-link">Notifications</a>
+                        <a  href="#" @click="routeToNotification" class="nav-link" id="notificationRouter">Notifications</a>
                     </li>
                     <li class="nav-item me-3 fs-5  fw-light">
-                        <a href="#" @click="routeToReview" class="nav-link"  >Reviews</a>
+                        <a  href="#" @click="routeToReview" class="nav-link" id="reviewRouter"  >Reviews</a>
                     </li>
                    
                     <li class="nav-item dropdown me-3 fs-5  fw-light">

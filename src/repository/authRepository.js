@@ -38,7 +38,6 @@ const login = async (email, password, MachineId) => {
           resolve();
           return;
         }
-        console.log(error.message);
         if (error.response.data.status == "Invalid Password") {
           passwordError = error.response.data.status;
         } else if (error.response.data.status) {

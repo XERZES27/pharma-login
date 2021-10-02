@@ -183,8 +183,7 @@ const getDrugsAlphabetically = (pageNumber) => {
         process.env.VUE_APP_HOSTADDRESS + `inventory/getDrugsAlphabetically?pageNumber=${pageNumber}`,
         {
           headers: store.getters.getHeader,
-        }
-      )
+        })
       .then((response) => {
         resolve(response.data);
       })

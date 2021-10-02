@@ -43,7 +43,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-danger"
+                class="btn btn-danger performDeleteDrugInModal"
                 @click="performDelete(currentDrugToDelete)"
                 data-bs-dismiss="modal"
               >
@@ -58,7 +58,7 @@
         ref="addDrugModalRef"
         class="modal fade"
         data-bs-backdrop="static"
-        id="exampleModal"
+        id="addDrugModal"
         tabindex="-1"
         aria-hidden="true"
       >
@@ -71,7 +71,7 @@
               <button
                 :disabled="isProcessingCreateDrugPhase"
                 type="button"
-                class="btn-close"
+                class="btn-close closeAddDrugModal"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
@@ -80,14 +80,14 @@
               <div v-if="initialCreateDrugPhase" class="container-md">
                 <div v-if="!createDrugIsSuccessfull" class="row">
                   <p class="text-danger ps-2">
-                    <strong>{{ createDrugError }}</strong>
+                    <strong id="createDrugErrorField">{{ createDrugError }}</strong>
                   </p>
                 </div>
                 <div v-if="createDrugIsSuccessfull" class="row">
                   <p class="text-success ps-2">
                     <strong
-                      >Congratulation, The Drug Has been Added to your
-                      database</strong
+                    id="createDrugSuccessField"
+                      >Congratulation, The Drug Has been Added to your database</strong
                     >
                   </p>
                 </div>
@@ -99,7 +99,6 @@
                 <div class="row ms-1">
                   <input
                     v-model="nameModel"
-                    id="Add-Drug-Input"
                     type="text "
                     class="
                       fw-bold
@@ -110,6 +109,7 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-Name-Input
                     "
                     placeholder="Drug Name"
                   />
@@ -130,6 +130,7 @@
                   <input
                     v-model="priceModel"
                     type="text "
+                    
                     class="
                       fw-bold
                       form-control
@@ -139,6 +140,7 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-Price-Input
                     "
                     placeholder="Price"
                   />
@@ -167,6 +169,7 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-Amount-Input
                     "
                     placeholder="Amount In Stock"
                   />
@@ -187,10 +190,11 @@
                 </div>
                 <div class="row ms-2 mb-1">
                   <input
+                  class="Add-Drug-RequiredPrescription-Input"
                     v-model="requiresPrescriptionModel"
                     type="checkbox"
                     id="Add-Drug-Switch"
-                  /><label for="Add-Drug-Switch">Toggle</label>
+                  /><label class="Add-Drug-RequiredPrescription-Label" for="Add-Drug-Switch">Toggle</label>
                 </div>
                 <div class="row mt-2">
                   <span class="input-group-text bg-white border-0"
@@ -210,6 +214,7 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-Description-Input
                     "
                     placeholder="Description"
                   />
@@ -238,6 +243,8 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-BrandName-Input
+                      
                     "
                     placeholder="Optional, Brand Name"
                   />
@@ -266,6 +273,8 @@
                       border-start-0
                       border-dark
                       text-dark
+                      Add-Drug-Country-Input
+
                     "
                     placeholder="Optional, Country Of Origin"
                   />
@@ -294,6 +303,7 @@
               <button
                 :disabled="isProcessingCreateDrugPhase"
                 type="button"
+                
                 class="btn btn-danger"
                 data-bs-dismiss="modal"
               >
@@ -310,7 +320,7 @@
                   isProcessingCreateDrugPhase
                 "
                 type="button"
-                class="btn btn-dark"
+                class="btn btn-dark Add-Drug-Create-Button"
                 @click="performCreate"
               >
                 Create
@@ -348,7 +358,7 @@
             type="button"
             id="add-button"
             data-bs-toggle="modal"
-            data-bs-target="#exampleModal"
+            data-bs-target="#addDrugModal"
             class="bi bi-plus px-md-5 px-4 border mx-2"
             style="font-size: 2rem"
           ></i>
@@ -374,6 +384,7 @@
                 class="
                   form-control
                   border border-dark border-top-0 border-bottom-0
+                  searchInputBox
                 "
                 placeholder="Search Drugs"
                 aria-label="Recipient's username"
@@ -398,14 +409,17 @@
             </div>
           </div>
         </div>
-        <div v-if="drugRecomendations.length != 0">
+        <div v-if="drugRecomendations.length != 0" class="drugRecommendations">
           <div
-            v-for="(recommendation, index) in drugRecomendations"
+            v-for="(recommendation, index) in drugRecomendations" 
+            
             :key="index"
           >
-            <div class="row d-flex justify-content-end pt-1">
+            <div class="row d-flex justify-content-end pt-1" 
+            >
               <div class="col-md-11">
                 <div
+                :class="recommendation['name']+recommendation['brandName']"
                   class="card border border-top-0 border-end-0"
                   type="button"
                   @click="queryDrugById(recommendation['_id'])"
@@ -453,7 +467,7 @@
             <div class="d-inline me-2">
               <input
                 type="radio"
-                class="btn-check"
+                class="btn-check sortByAlpha"
                 name="options-outlined"
                 id="primary-outlined"
                 value="Alphabetically"
@@ -469,7 +483,7 @@
             <div class="d-inline">
               <input
                 type="radio"
-                class="btn-check ps-3"
+                class="btn-check ps-3 sortByDate"
                 name="options-outlined"
                 id="danger-outlined"
                 value="By Date"
@@ -490,19 +504,20 @@
         v-for="(inventory, index) in inventoryList"
         :key="index"
         class="row d-flex justify-content-end mt-3 mb-5"
+        :class="inventory['name']+inventory['brandName']"
       >
         <div class="col-md-11">
           <div
             v-if="inventory['isProcessing']"
-            class="d-flex justify-content-between align-items-center"
+            class="d-flex justify-content-between align-items-center drugInIndexIsProcessing"
           >
             <p class="d-inline text-info pt-2 ps-3">
-              <strong> Please Wait ....</strong>
+              <strong class='waitMessageForDrugInIndex'>Please Wait ....</strong>
             </p>
           </div>
           <div
             v-if="inventory['deleteFailed'] || inventory['deleteSuccess']"
-            class="d-flex justify-content-between align-items-center"
+            class="d-flex justify-content-between align-items-center drugInIndexDeleteMessage"
           >
             <p
               :class="{
@@ -514,7 +529,7 @@
               <strong v-if="inventory['deleteFailed']">{{
                 inventory["deleteError"]
               }}</strong>
-              <strong v-if="inventory['deleteSuccess']"
+              <strong class="deleteSucessForDrugInIndex" v-if="inventory['deleteSuccess']"
                 >Deleted Successfully</strong
               >
             </p>
@@ -538,7 +553,7 @@
               <strong v-if="inventory['updateFailed']">{{
                 inventory["updateError"]
               }}</strong>
-              <strong v-if="inventory['updateSuccess']"
+              <strong class="drugInIndexUpdateSuccess" v-if="inventory['updateSuccess']"
                 >Updated Successfully</strong
               >
             </p>
@@ -550,6 +565,7 @@
           </div>
           <div
             class="card border border-top-0 text-start mt-3"
+            
             id="inventory-card"
             :style="{
               animation: inventory['isProcessing']
@@ -569,7 +585,7 @@
             </div>
             <div class="row">
               <div class="col">
-                <div class="card-body text-start ps-4" id="inverntory-body">
+                <div class="card-body text-start ps-4" id="inventory-body">
                   <p class="fs-5">
                     Brand-Name :<strong class="ps-3 fs-6 text-secondary">{{
                       inventory["brandName"]
@@ -580,7 +596,7 @@
                     <input
                       type="text"
                       :disabled="inventory['isNotEditable']"
-                      class="form-control"
+                      class="form-control drugInIndexPriceInput"
                       v-model="inventory['priceModel']"
                       :style="{
                         'border-bottom':
@@ -599,7 +615,7 @@
                       inventory['priceError'] !== '' &&
                       inventory['isNotEditable'] == false
                     "
-                    class="text-danger text-end ms-5 pe-1"
+                    class="text-danger text-end ms-5 pe-1 drugInIndexPriceInputError"
                   >
                     <strong> {{ inventory["priceError"] }}</strong>
                   </p>
@@ -758,7 +774,7 @@
                 <i
                   type="button"
                   @click="toggleEditable(index)"
-                  class="bi bi-pen pe-4"
+                  class="bi bi-pen pe-4 editDrugInIndex"
                   style="font-size: 110%"
                 ></i>
                 <i
@@ -768,7 +784,7 @@
                       currentDrugToDelete = index;
                     }
                   "
-                  class="bi bi-trash"
+                  class="bi bi-trash deleteDrugInIndex"
                   style="font-size: 110%"
                   data-bs-toggle="modal"
                   data-bs-target="#confirmDelete"
@@ -788,7 +804,7 @@
             "
           >
             <button
-              class="btn btn-danger me-md-3 px-md-5 shadow"
+              class="btn btn-danger me-md-3 px-md-5 shadow cancelDrugEditIndex"
               type="button"
               :disabled="inventory['isProcessing']"
               @click="toggleEditable(index)"
@@ -796,7 +812,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-success px-md-5 shadow"
+              class="btn btn-success px-md-5 shadow updateDrugInIndex"
               type="button"
               :disabled="inventory['isProcessing']"
               @click="performUpdate(index)"
@@ -970,7 +986,7 @@ export default {
   outline: none;
   box-shadow: none;
 }
-#inverntory-body{
+#inventory-body{
   font-family: Times New Roman, serif ;
 }
 #inventory-card {

@@ -1,12 +1,13 @@
 <template>
   <div class="whole">
-    <form @submit.prevent="submitForm" novalidate>
+    <form @submit.prevent="submitForm" novalidate id="loginForm">
       <label>Email: </label>
-      <input type="email" required v-model="email" />
+      <input id="loginEmailInput" type="email" required v-model="email" />
       <div v-if="emailError.length != 0" class="error">{{ emailError }}</div>
       <label>Password: </label>
       <div class="passwordeye">
         <input
+          id="loginPasswordInput"
           type="password"
           ref="refshowpassword"
           required
@@ -15,12 +16,13 @@
         <span class="showpassword" @click="togglePassword">show password</span>
       </div>
 
-      <div v-if="passwordError.length != 0" class="error">
+      <div v-if="passwordError.length != 0" class="error passwordError">
         {{ passwordError }}
       </div>
       <div class="term">
         <input
           type="checkbox"
+          class="termsAndConditionsCheckBox"
           name=""
           id=""
           required
@@ -51,7 +53,6 @@ export default {
   beforeUnmount() {
     document.querySelector("body").setAttribute("style", "background:#FBFEFF");
   },
-  
 
   setup(props) {
     const {
