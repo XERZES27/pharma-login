@@ -2,9 +2,9 @@
   <section id="inventoryHome">
     <div class="container-md" v-scroll="handleScroll">
       <!-- Confirm Delete Modal -->
-      <div class="modal fade"
+      <div
+        class="modal fade"
         ref="confirmDeleteModalRef"
-        
         id="confirmDelete"
         tabindex="-1"
         aria-labelledby="confirmDeleteLabel"
@@ -55,8 +55,8 @@
       </div>
       <!-- Create Drug Modal -->
       <div
-        ref="addDrugModalRef"
         class="modal fade"
+        ref="addDrugModalRef"
         data-bs-backdrop="static"
         id="addDrugModal"
         tabindex="-1"
@@ -80,14 +80,16 @@
               <div v-if="initialCreateDrugPhase" class="container-md">
                 <div v-if="!createDrugIsSuccessfull" class="row">
                   <p class="text-danger ps-2">
-                    <strong id="createDrugErrorField">{{ createDrugError }}</strong>
+                    <strong id="createDrugErrorField">{{
+                      createDrugError
+                    }}</strong>
                   </p>
                 </div>
                 <div v-if="createDrugIsSuccessfull" class="row">
                   <p class="text-success ps-2">
-                    <strong
-                    id="createDrugSuccessField"
-                      >Congratulation, The Drug Has been Added to your database</strong
+                    <strong id="createDrugSuccessField"
+                      >Congratulation, The Drug Has been Added to your
+                      database</strong
                     >
                   </p>
                 </div>
@@ -130,7 +132,6 @@
                   <input
                     v-model="priceModel"
                     type="text "
-                    
                     class="
                       fw-bold
                       form-control
@@ -190,11 +191,15 @@
                 </div>
                 <div class="row ms-2 mb-1">
                   <input
-                  class="Add-Drug-RequiredPrescription-Input"
+                    class="Add-Drug-RequiredPrescription-Input"
                     v-model="requiresPrescriptionModel"
                     type="checkbox"
                     id="Add-Drug-Switch"
-                  /><label class="Add-Drug-RequiredPrescription-Label" for="Add-Drug-Switch">Toggle</label>
+                  /><label
+                    class="Add-Drug-RequiredPrescription-Label"
+                    for="Add-Drug-Switch"
+                    >Toggle</label
+                  >
                 </div>
                 <div class="row mt-2">
                   <span class="input-group-text bg-white border-0"
@@ -244,7 +249,6 @@
                       border-dark
                       text-dark
                       Add-Drug-BrandName-Input
-                      
                     "
                     placeholder="Optional, Brand Name"
                   />
@@ -274,7 +278,6 @@
                       border-dark
                       text-dark
                       Add-Drug-Country-Input
-
                     "
                     placeholder="Optional, Country Of Origin"
                   />
@@ -303,7 +306,6 @@
               <button
                 :disabled="isProcessingCreateDrugPhase"
                 type="button"
-                
                 class="btn btn-danger"
                 data-bs-dismiss="modal"
               >
@@ -329,141 +331,93 @@
           </div>
         </div>
       </div>
+
+      <!-- Drug Reviews Modal -->
+      <InventoryReviewComponent
+        ref="drugReviewsModal"
+        :reviews="currentlyLoadedDrugReviews['loadedReviews']"
+        :index="currentlyLoadedDrugReviews['index']"
+        :drugName="currentlyLoadedDrugReviews['drugName']"
+        :drugBrandName="currentlyLoadedDrugReviews['drugBrandName']"
+        :disableNextPage="currentlyLoadedDrugReviews['disableNextPage']"
+        :fetchingReviews="currentlyLoadedDrugReviews['fetchingReviews']"
+        :fetchingReviewsError="currentlyLoadedDrugReviews['fetchingReviewsError']"
+        @getReviewsForDrugEvent="getReviewsForDrugEvent"
+        @clearDataEvent="clearDataEvent"
+      >
+      </InventoryReviewComponent>
+
       <div class="row bg-light align-items-center text-start mb-4">
         <div
-          class="col-md-12 py-4 ps-5 display-4"
+          class="
+            col-md-12
+            py-4
+            ps-5
+            display-4
+            d-flex
+            justify-content-between
+            align-items-end
+          "
           id="Heading"
         >
-          Inventory
-        </div>
-      </div>
-      <div class="row mb-5 align-items-end">
-        <div class="col text-end">
-          <i
-            type="button"
-            @click="getInventory()"
-            id="refresh-button"
-            class="bi bi-arrow-counterclockwise px-md-5 px-4 border mx-2"
-            style="font-size: 2rem"
-          ></i>
-          <i
-            type="button"
-            id="upload-button"
-            @click="createInventory"
-            class="bi bi-upload px-md-5 px-4 border mx-2"
-            style="font-size: 2rem"
-          ></i>
-
-          <i
-            type="button"
-            id="add-button"
-            data-bs-toggle="modal"
-            data-bs-target="#addDrugModal"
-            class="bi bi-plus px-md-5 px-4 border mx-2"
-            style="font-size: 2rem"
-          ></i>
-
-          <i
-            type="button"
-            id="delete-button"
-            class="bi bi-x px-md-5 px-4 border ms-2"
-            style="font-size: 2rem"
-          ></i>
-        </div>
-      </div>
-      <div id="floating-search" v-click-away="onClickAway" class="mb-5">
-        <div class="row d-flex align-items-center justify-content-end">
-          <div class="col-md-11">
-            <div
-              class="input-group input-group-lg"
-              id="search-bar"
-              style="box-shadow: 10px 5px 12px #e2e2e2"
-            >
-              <input
-                type="text"
-                class="
-                  form-control
-                  border border-dark border-top-0 border-bottom-0
-                  searchInputBox
-                "
-                placeholder="Search Drugs"
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
-                v-model="searchQuery"
-                @keyup="processChange"
-              />
+          <span class="d-inline">Inventory</span>
+          <div class="d-inline me-4">
+            <div class="">
               <button
-                :disabled="searchQuery.trim() === ''"
-                class="
-                  input-group-text
-                  border border-dark
-                  text-white
-                  bg-dark
-                  px-6
-                "
-                @click="queryDrugByNameOrBrandName(searchQuery)"
-                id="basic-addon2"
+                @click="getInventory('reset')"
+                class="btn btn-outline-dark d-md-inline me-2 d-none"
+                type="button"
               >
-                <i class="fas fa-search"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+                REFRESH
+              </button>
+              <button
+                @click="createInventory"
+                class="btn btn-outline-dark d-inline me-2"
+                type="button"
+              >
+                <i class="bi bi-cloud-arrow-up-fill"></i>
+                UPLOAD
+              </button>
+              <button
+                class="btn btn-outline-dark d-inline"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#addDrugModal"
+              >
+                <i class="bi bi-file-plus-fill" style="font-size: 15px"></i>
+                ADD
               </button>
             </div>
           </div>
         </div>
-        <div v-if="drugRecomendations.length != 0" class="drugRecommendations">
-          <div
-            v-for="(recommendation, index) in drugRecomendations" 
-            
-            :key="index"
-          >
-            <div class="row d-flex justify-content-end pt-1" 
-            >
-              <div class="col-md-11">
-                <div
-                :class="recommendation['name']+recommendation['brandName']"
-                  class="card border border-top-0 border-end-0"
-                  type="button"
-                  @click="queryDrugById(recommendation['_id'])"
-                >
-                  <div class="row">
-                    <div class="col">
-                      <div class="card-body text-start">
-                        <h5 class="card-title">{{ recommendation["name"] }}</h5>
-                        <h6 class="card-subtitle text-muted">
-                          {{ recommendation["brandName"] }}
-                        </h6>
-                      </div>
-                    </div>
-                    <div
-                      class="col d-flex justify-content-end align-items-center"
-                    >
-                      <i class="bi bi-search pe-4"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="resultCameEmpty !== ''">
-          <div class="row d-flex justify-content-center pt-3">
-            <div class="col-md-10">
-              <p class="fs-3">{{ resultCameEmpty }}</p>
-            </div>
-          </div>
-        </div>
       </div>
+
+      <inventorySearchBar
+        v-click-away="onClickAway"
+        :resultCameEmpty="resultCameEmpty"
+        :drugRecomendations="drugRecomendations"
+        v-model:searchQuery="searchQuery"
+        @update:searchQuery="callProcessChange"
+        @queryDrugByIdEvent="queryDrugByIdEvent"
+        @queryDrugByNameOrBrandNameEvent="queryDrugByNameOrBrandNameEvent"
+      ></inventorySearchBar>
+
       <div class="row d-flex justify-content-end mt-5 mb-5 mx-md-1">
         <div
-          class="col-md-11 mt-md-0 mt-2 d-flex  
-            justify-content-between  align-items-center py-1 ps-3
+          class="
+            col-md-11
+            mt-md-0 mt-2
+            d-flex
+            justify-content-between
+            align-items-center
+            py-1
+            ps-3
           "
           id="Heading"
         >
-          <p
-            class="fs-3 d-inline pt-4 d-flex "
-            >Drugs Sorted {{ pickedSort }}</p
-          >
-          <div class="d-inline me-4  ">
+          <p class="fs-3 d-inline pt-4 d-flex">Drugs Sorted {{ pickedSort }}</p>
+          <div class="d-inline me-4">
             <div class="d-inline me-2">
               <input
                 type="radio"
@@ -496,28 +450,50 @@
             </div>
           </div>
         </div>
-        <div class=" col-md-11 border-bottom border-dark border-3 pt-3">
-
+        <div class="col-md-11 border-top border-dark border-3 pt-2"></div>
+      </div>
+      <div
+        v-if="loadingInventory"
+        class="col-md-11 mb-4 d-flex justify-content-center"
+      >
+        <div
+          class="spinner-border text-info text-center"
+          style="width: 3rem; height: 3rem"
+          role="status"
+        >
+          <span class="visually-hidden">Fetching Data...</span>
         </div>
       </div>
       <div
         v-for="(inventory, index) in inventoryList"
         :key="index"
         class="row d-flex justify-content-end mt-3 mb-5"
-        :class="inventory['name']+inventory['brandName']"
+        :class="inventory['name'] + inventory['brandName']"
       >
         <div class="col-md-11">
           <div
             v-if="inventory['isProcessing']"
-            class="d-flex justify-content-between align-items-center drugInIndexIsProcessing"
+            class="
+              d-flex
+              justify-content-between
+              align-items-center
+              drugInIndexIsProcessing
+            "
           >
             <p class="d-inline text-info pt-2 ps-3">
-              <strong class='waitMessageForDrugInIndex'>Please Wait ....</strong>
+              <strong class="waitMessageForDrugInIndex"
+                >Please Wait ....</strong
+              >
             </p>
           </div>
           <div
             v-if="inventory['deleteFailed'] || inventory['deleteSuccess']"
-            class="d-flex justify-content-between align-items-center drugInIndexDeleteMessage"
+            class="
+              d-flex
+              justify-content-between
+              align-items-center
+              drugInIndexDeleteMessage
+            "
           >
             <p
               :class="{
@@ -529,7 +505,9 @@
               <strong v-if="inventory['deleteFailed']">{{
                 inventory["deleteError"]
               }}</strong>
-              <strong class="deleteSucessForDrugInIndex" v-if="inventory['deleteSuccess']"
+              <strong
+                class="deleteSucessForDrugInIndex"
+                v-if="inventory['deleteSuccess']"
                 >Deleted Successfully</strong
               >
             </p>
@@ -553,7 +531,9 @@
               <strong v-if="inventory['updateFailed']">{{
                 inventory["updateError"]
               }}</strong>
-              <strong class="drugInIndexUpdateSuccess" v-if="inventory['updateSuccess']"
+              <strong
+                class="drugInIndexUpdateSuccess"
+                v-if="inventory['updateSuccess']"
                 >Updated Successfully</strong
               >
             </p>
@@ -565,7 +545,6 @@
           </div>
           <div
             class="card border border-top-0 text-start mt-3"
-            
             id="inventory-card"
             :style="{
               animation: inventory['isProcessing']
@@ -574,207 +553,221 @@
             }"
           >
             <div
-              class="card-header border-bottom-0 mb-2
-               d-flex
-            justify-content-between
+              class="
+                card-header
+                border-bottom-0
+                mb-2
+                d-flex
+                justify-content-between
               "
               id="Card-Header-Inventory"
             >
               <h5 class="pt-3">Name: {{ inventory["name"] }}</h5>
-              <p class="pt-3">Created: {{inventory["creationDate"]}}</p>
+              <p class="pt-3">Created: {{ inventory["creationDate"] }}</p>
             </div>
-            <div class="row">
-              <div class="col">
-                <div class="card-body text-start ps-4" id="inventory-body">
-                  <p class="fs-5">
-                    Brand-Name :<strong class="ps-3 fs-6 text-secondary">{{
-                      inventory["brandName"]
-                    }}</strong>
-                  </p>
-                  <div class="input-group d-flex align-items-start">
-                    <p class="fs-5 pe-1" id="basic-addon1">Price :</p>
-                    <input
-                      type="text"
-                      :disabled="inventory['isNotEditable']"
-                      class="form-control drugInIndexPriceInput"
-                      v-model="inventory['priceModel']"
-                      :style="{
-                        'border-bottom':
-                          inventory['isNotEditable'] === true
-                            ? '0px none rgb(206, 206, 206)'
-                            : inventory['priceError'] !== ''
-                            ? '2px solid rgb(206, 0, 0)'
-                            : '2px solid rgb(206, 206, 206)',
-                      }"
-                      aria-label="Username"
-                      aria-describedby="basic-addon1"
-                    />
+
+            <div class="row card-body text-start ps-4" id="inventory-body">
+              <div class="col-10">
+                <p class="fs-5" v-if="inventory['brandName'] !== undefined">
+                  Brand-Name :<strong class="ps-3 fs-6 text-secondary">{{
+                    inventory["brandName"]
+                  }}</strong>
+                </p>
+
+                <div class="input-group d-flex align-items-start">
+                  <p class="fs-5 pe-1" id="basic-addon1">Price :</p>
+                  <input
+                    type="text"
+                    :disabled="inventory['isNotEditable']"
+                    class="form-control drugInIndexPriceInput"
+                    v-model="inventory['priceModel']"
+                    :style="{
+                      'border-bottom':
+                        inventory['isNotEditable'] === true
+                          ? '0px none rgb(206, 206, 206)'
+                          : inventory['priceError'] !== ''
+                          ? '2px solid rgb(206, 0, 0)'
+                          : '2px solid rgb(206, 206, 206)',
+                    }"
+                    aria-label="Username"
+                    aria-describedby="basic-addon1"
+                  />
+                </div>
+                <p
+                  v-if="
+                    inventory['priceError'] !== '' &&
+                    inventory['isNotEditable'] == false
+                  "
+                  class="
+                    text-danger text-end
+                    ms-5
+                    pe-1
+                    drugInIndexPriceInputError
+                  "
+                >
+                  <strong> {{ inventory["priceError"] }}</strong>
+                </p>
+
+                <div class="input-group d-flex align-items-start">
+                  <p class="fs-5 pe-1" id="basic-addon1">Amount In Stock :</p>
+                  <input
+                    type="text"
+                    :disabled="inventory['isNotEditable']"
+                    class="form-control"
+                    v-model="inventory['amountInStockModel']"
+                    :style="{
+                      'border-bottom':
+                        inventory['isNotEditable'] === true
+                          ? '0px none rgb(206, 206, 206)'
+                          : inventory['amountInStockError'] !== ''
+                          ? '2px solid rgb(206, 0, 0)'
+                          : '2px solid rgb(206, 206, 206)',
+                    }"
+                    aria-label="Username"
+                    aria-describedby="basic-addon1"
+                  />
+                </div>
+                <p
+                  v-if="
+                    inventory['amountInStockError'] !== '' &&
+                    !inventory['isNotEditable']
+                  "
+                  class="text-danger ms-5 pe-1 text-end"
+                >
+                  <strong>{{ inventory["amountInStockError"] }}</strong>
+                </p>
+
+                <div v-if="inventory['toggleMore']">
+                  <div class="mb-2">
+                    <div class="d-flex">
+                      <p class="fs-5 d-inline">Requries Prescription :</p>
+                      <Toggle
+                        class="d-inline ms-2 d-flex align-items-center mb-3"
+                        :disabled="inventory['isNotEditable']"
+                        style="
+                          --toggle-width: 35px;
+                          --toggle-ring-color: #10b98130;
+                          --toggle-text-on: #ffffff;
+                          --toggle-text-off: #374151;
+                          --toggle-bg-on: #383838;
+                          --toggle-bg-off: #bdbdbd;
+                          --toggle-border-on: #645c5c;
+                          --toggle-border-off: #d4d4d4;
+                          --toggle-font-size: 4px;
+                          --toggle-border: 2px;
+                          --toggle-ring-color: #948e8e25;
+                          --toggle-ring-width: 1px;
+                          --toggle-height: 17px;
+                        "
+                        
+                        v-model="inventory['requiresPrescriptionModel']"
+                      ></Toggle>
+                    </div>
                   </div>
-                  <p
-                    v-if="
-                      inventory['priceError'] !== '' &&
-                      inventory['isNotEditable'] == false
-                    "
-                    class="text-danger text-end ms-5 pe-1 drugInIndexPriceInputError"
-                  >
-                    <strong> {{ inventory["priceError"] }}</strong>
-                  </p>
 
                   <div class="input-group d-flex align-items-start">
-                    <p class="fs-5 pe-1" id="basic-addon1">Amount In Stock :</p>
+                    <p class="fs-5 pe-1" id="basic-addon1">
+                      Country Of Origin :
+                    </p>
                     <input
                       type="text"
                       :disabled="inventory['isNotEditable']"
                       class="form-control"
-                      v-model="inventory['amountInStockModel']"
                       :style="{
                         'border-bottom':
                           inventory['isNotEditable'] === true
                             ? '0px none rgb(206, 206, 206)'
-                            : inventory['amountInStockError'] !== ''
+                            : inventory['countryOfOriginError'] !== ''
                             ? '2px solid rgb(206, 0, 0)'
                             : '2px solid rgb(206, 206, 206)',
                       }"
+                      v-model="inventory['countryOfOriginModel']"
+                      :placeholder="
+                        inventory['countryOfOrigin'] == null
+                          ? 'Not Assigned'
+                          : inventory['countryOfOrigin']
+                      "
                       aria-label="Username"
                       aria-describedby="basic-addon1"
                     />
                   </div>
                   <p
                     v-if="
-                      inventory['amountInStockError'] !== '' &&
-                      !inventory['isNotEditable']
+                      inventory['countryOfOriginError'] !== '' &&
+                      inventory['isNotEditable'] == false
                     "
                     class="text-danger ms-5 pe-1 text-end"
                   >
-                    <strong>{{ inventory["amountInStockError"] }}</strong>
+                    <strong>{{ inventory["countryOfOriginError"] }}</strong>
                   </p>
 
-                  <div v-if="inventory['toggleMore']">
-                    <div class="mb-2">
-                      <div class="row">
-                        <p class="fs-5 col-6 col-lg-3 ">
-                          Requries Prescription :
-                        </p>
-                        <div class="col-1 ps-0 ">
-                          <input
-                            class="
-                              form-check-input
-                              d-flex
-                              justify-content-start
-                            "
-                            :disabled="inventory['isNotEditable']"
-                            v-model="inventory['requiresPrescriptionModel']"
-                            type="checkbox"
-                            id="Edit-Drug-Switch"
-                          /><label
-                            for="Edit-Drug-Switch"
-                            :style="{
-                              'background-color': inventory['isNotEditable']
-                                ? 'grey'
-                                : '',
-                              'pointer-events': inventory['isNotEditable']
-                                ? 'none'
-                                : 'auto',
-                            }"
-                            >Toggle</label
-                          >
-                        </div>
-                      </div>
-                      <!-- <input
-                        class="form-check-input ms-3 "
-                        :disabled="inventory['isNotEditable']"
-                        type="checkbox"
-                        v-model="inventory['requiresPrescriptionModel']"
-                        id="requiresPrescriptioncheckbox"
-                        style="background-color: black"
-                      /> -->
+                  <p class="fs-5">
+                    Description :<strong class="ps-3 fs-6 text-muted">{{
+                      !inventory["description"] ? " " : inventory["description"]
+                    }}</strong>
+                  </p>
+                  <p class="fs-5">
+                    Rating :<strong class="ps-3 fs-6 text-muted">{{
+                      inventory["rating"] === 0
+                        ? "Has Not Been Rated"
+                        : inventory["rating"]
+                    }}</strong>
+                  </p>
+                  <p
+                    v-if="inventory['fetchingReviews'] === false"
+                    @click="getReviewsForDrug(index, 'reset', true)"
+                    type="button"
+                    :disabled="inventory['reviewsCount'] === 0"
+                    :style="{
+                      color:
+                        inventory['reviewsCount'] === 0 ? '#81807C' : '#EBCA5E',
+                        'pointer-events':inventory['reviewsCount']===0?'none':'auto'
+                    }"
+                    class="col-md-4 col-lg-2 fs-5 text-decoration-underline"
+                  >
+                    {{ "Load Reviews" }}
+                  </p>
+                  <div v-else>
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">Loading...</span>
                     </div>
+                  </div>
+                  <p style="font-family: arial, verdana, sans-serif;" v-if="inventory['fetchingReviewsError']!==''"
+                class="text-danger  "
+                ><strong>{{inventory['fetchingReviewsError']}}</strong></p>
+                </div>
+                
 
-                    <div class="input-group d-flex align-items-start">
-                      <p class="fs-5 pe-1" id="basic-addon1">
-                        Country Of Origin :
-                      </p>
-                      <input
-                        type="text"
-                        :disabled="inventory['isNotEditable']"
-                        class="form-control"
-                        :style="{
-                          'border-bottom':
-                            inventory['isNotEditable'] === true
-                              ? '0px none rgb(206, 206, 206)'
-                              : inventory['countryOfOriginError'] !== ''
-                              ? '2px solid rgb(206, 0, 0)'
-                              : '2px solid rgb(206, 206, 206)',
-                        }"
-                        v-model="inventory['countryOfOriginModel']"
-                        :placeholder="
-                          inventory['countryOfOrigin'] == null
-                            ? 'Not Assigned'
-                            : inventory['countryOfOrigin']
-                        "
-                        aria-label="Username"
-                        aria-describedby="basic-addon1"
-                      />
-                    </div>
-                    <p
-                      v-if="
-                        inventory['countryOfOriginError'] !== '' &&
-                        inventory['isNotEditable'] == false
+                <div class="d-flex justify-content-center">
+                  <div class="d-inline"></div>
+                  <button
+                    id="expandButton"
+                    class="btn btn-white w-100 text-dark d-inline"
+                    type="button"
+                    @click="toggleMore(index)"
+                  >
+                    <i
+                      :class="
+                        inventory['toggleMore']
+                          ? 'bi bi-chevron-up'
+                          : 'bi bi-chevron-down'
                       "
-                      class="text-danger ms-5 pe-1 text-end"
-                    >
-                      <strong>{{ inventory["countryOfOriginError"] }}</strong>
-                    </p>
-                    <p class="fs-5">
-                      Rating :<strong class="ps-3 fs-6 text-muted">{{
-                        inventory["rating"] === 0
-                          ? "Has Not Been Rated"
-                          : inventory["rating"]
-                      }}</strong>
-                    </p>
-                    <p class="fs-5">
-                      Description :<strong class="ps-3 fs-6 text-muted">{{
-                        !inventory["description"]
-                          ? " "
-                          : inventory["description"]
-                      }}</strong>
-                    </p>
-                    <p class="fs-5">
-                      Date of Creation :<strong class="ps-3 fs-6 text-muted">{{
-                        inventory["creationDate"]
-                      }}</strong>
-                    </p>
-                  </div>
-
-                  <div class="d-flex justify-content-center">
-                    <button
-                      id="expandButton"
-                      class="btn btn-white w-100 text-dark"
-                      type="button"
-                      @click="toggleMore(index)"
-                    >
-                      <i
-                        :class="
-                          inventory['toggleMore']
-                            ? 'bi bi-chevron-up'
-                            : 'bi bi-chevron-down'
-                        "
-                      ></i>
-                    </button>
-                  </div>
+                    ></i>
+                  </button>
                 </div>
               </div>
+
               <div
                 :style="{
                   'pointer-events': inventory['isProcessing'] ? 'none' : 'auto',
                   opacity: inventory['isProcessing'] ? '0.7' : '1',
                 }"
-                class="col-2 h-50 d-flex justify-content-end me-3 pe-4 mt-1"
+                class="col-2 h-50 d-flex mt-1 justify-content-end"
               >
                 <i
                   type="button"
                   @click="toggleEditable(index)"
-                  class="bi bi-pen pe-4 editDrugInIndex"
+                  class="bi bi-pen me-4 editDrugInIndex"
                   style="font-size: 110%"
                 ></i>
                 <i
@@ -790,6 +783,14 @@
                   data-bs-target="#confirmDelete"
                 ></i>
               </div>
+            </div>
+          </div>
+          <div
+            v-if="inventory['showReviews'] && inventory['fetchingReviews']"
+            class="col-10 d-grid mt-4 justify-content-center"
+          >
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
           </div>
           <div
@@ -837,9 +838,13 @@
           </p>
         </div>
       </div>
-      <div v-if="!hasScrolledToBottom && inventoryList.length!==0" class="col-md-11 mb-4">
+
+      <div
+        v-if="!hasScrolledToBottom && inventoryList.length !== 0"
+        class="col-md-11 mb-4 d-flex justify-content-center"
+      >
         <div
-          class="spinner-border text-info"
+          class="spinner-border text-info text-center"
           style="width: 3rem; height: 3rem"
           role="status"
         >
@@ -855,31 +860,39 @@ import { inventoryHome } from "../../composables/Inventory/InventoryHome";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
+import inventorySearchBar from "./reusables/inventorySearchBar.vue";
+import InventoryReviewComponent from "./reusables/InventoryReviewComponent";
+import Toggle from "@vueform/toggle";
 export default {
+  components: { inventorySearchBar, Toggle, InventoryReviewComponent },
   name: "InventoryHomeComponent",
   data() {
     return {};
   },
 
   methods: {
-    
-    handleScroll(el) {
-      // console.log(el.target.scrollingElement.offsetHeight,
-      // el.target.scrollingElement.scrollTop,
-      // el.target.scrollingElement.scrollHeight)
-      // console.log(el.path[1].innerHeight)
-      if (this.hasScrolledToBottom === false) {
-        if (
-          el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
-          el.target.scrollingElement.scrollHeight
-        ) {
-          console.log("has reached the bottom")
-          this.getInventory("Load");
-          this.hasScrolledToBottom = true;
-        }
-      }
+    callProcessChange(event, value) {
+      this.processChange();
     },
-    //TODO allow pagination
+    queryDrugByNameOrBrandNameEvent(event, value) {
+      this.queryDrugByNameOrBrandName(event);
+    },
+    queryDrugByIdEvent(event, value) {
+      this.queryDrugById(event);
+    },
+    clearDataEvent(event, value) {
+      this.currentlyLoadedDrugReviews["loadedReviews"] = [];
+      this.currentlyLoadedDrugReviews["index"] = 0;
+      this.currentlyLoadedDrugReviews["drugName"] = "";
+      this.currentlyLoadedDrugReviews["drugBrandName"] = "";
+      this.currentlyLoadedDrugReviews["disableNextPage"] = false;
+      this.currentlyLoadedDrugReviews["fetchingReviewsError"] = "";
+      
+    },
+    getReviewsForDrugEvent(event, value) {
+      this.getReviewsForDrug(event,"load",false)
+    },
+
     onClickAway(event) {
       if (this.drugRecomendations.length != 0) this.drugRecomendations = [];
     },
@@ -890,6 +903,7 @@ export default {
 
   setup(props, context) {
     const {
+      currentScrollPosition,
       initialCreateDrugPhase,
       createDrugError,
       isProcessingCreateDrugPhase,
@@ -928,8 +942,15 @@ export default {
       performCreate,
       performUpdate,
       performDelete,
+      handleScroll,
+      loadingInventory,
+      getInventoryError,
+      getReviewsForDrug,
+      drugReviewsModal,
+      currentlyLoadedDrugReviews,
     } = inventoryHome();
     return {
+      currentScrollPosition,
       initialCreateDrugPhase,
       createDrugError,
       isProcessingCreateDrugPhase,
@@ -968,26 +989,40 @@ export default {
       performCreate,
       performUpdate,
       performDelete,
+      handleScroll,
+      loadingInventory,
+      getInventoryError,
+      getReviewsForDrug,
+      drugReviewsModal,
+      currentlyLoadedDrugReviews,
     };
   },
 };
 </script>
+<style src="@vueform/toggle/themes/default.css"></style>
 
 <style>
+.toggle-handle {
+  height: 15px;
+  width: 15px;
+  margin-top: 1px;
+  margin-right: 5px;
+  margin-left: 1px;
+}
+
 #Card-Header-Inventory {
   background-color: #d9dae2;
 }
 #Heading {
   background-color: #edf2fa;
-  font-family: Times New Roman, serif ;
-
+  font-family: Times New Roman, serif;
 }
 #Add-Drug-Input {
   outline: none;
   box-shadow: none;
 }
-#inventory-body{
-  font-family: Times New Roman, serif ;
+#inventory-body {
+  font-family: Times New Roman, serif;
 }
 #inventory-card {
   background-color: #fbfcff;
@@ -1037,46 +1072,6 @@ input[id="Add-Drug-Switch"]:checked + label:after {
 
 label[for="Add-Drug-Switch"]:active:after {
   width: 22px;
-}
-
-input[id="Edit-Drug-Switch"] {
-  height: 0;
-  width: 0;
-  visibility: hidden;
-  margin-top: 6px;
-  display: inline-block;
-}
-
-label[for="Edit-Drug-Switch"] {
-  cursor: pointer;
-  text-indent: -9999px;
-  width: 32px;
-  height: 19px;
-  background: grey;
-  display: block;
-  border-radius: 13px;
-  position: relative;
-}
-
-label[for="Edit-Drug-Switch"]:after {
-  content: "";
-  position: absolute;
-  top: 3.3px;
-  left: 3px;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  border-radius: 10px;
-  transition: 0.2s;
-}
-
-input[id="Edit-Drug-Switch"]:checked + label {
-  background: black;
-}
-
-input[id="Edit-Drug-Switch"]:checked + label:after {
-  left: calc(100% - 4px);
-  transform: translateX(-100%);
 }
 
 label[for="Add-Drug-Switch"]:active:after {

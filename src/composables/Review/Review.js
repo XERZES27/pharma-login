@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted,onUnmounted } from "vue";
 import {
   replyToDrugReview,
   replyToPhammacyReview,
@@ -11,7 +11,8 @@ const review = () => {
   const filterBy = ref("Recent");
   const reviews = ref([]);
   var pageNumber = 0;
-  var hasScrolledToBottom = false;
+  var hasScrolledToBottom = true;
+  var disableScrollBehavior = false;
   const getReviews = (Options="reset") => {
     var getReviewsType =
       reviewType.value === "DRUGS" ? getDrugReviews : getPharmacyReviews;
@@ -53,12 +54,17 @@ const review = () => {
     getReviews();
   });
 
+  onUnmounted(()=>{
+    disableScrollBehavior = true;
+  })
+
   onMounted(() => {
     getDrugReviews(filterBy.value, pageNumber)
       .then((response) => {
         reviews.value = response.data;
         preloadReview();
         pageNumber += 1;
+        hasScrolledToBottom = false
       })
       .catch((error) => console.log(error));
   });
@@ -144,19 +150,20 @@ const review = () => {
     }
   };
 
-  const handleScroll = (el) => {
-    if (hasScrolledToBottom === false) {
+  const handleScrollForReviews = (el) => {
+    if (hasScrolledToBottom === false && disableScrollBehavior === false) {
       if (
         el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
         el.target.scrollingElement.scrollHeight
       ) {
+        console.log("has also reached the bottom")
         hasScrolledToBottom = true;
         getReviews("load");
       }
     }
   };
 
-  return { reviewType, filterBy, reviews, replyToReview, handleScroll };
+  return { reviewType, filterBy, reviews, replyToReview, handleScrollForReviews };
 };
 
 export { review };

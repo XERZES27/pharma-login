@@ -1,6 +1,6 @@
 <template>
   <section id="Review">
-    <div class="container-md" v-scroll="handleScroll">
+    <div class="container-md" v-scroll="handleScrollForReviews">
       <div
         class="
           row
@@ -117,6 +117,7 @@
                   src="https://storage.googleapis.com/pharmacist-data/avatars/avatar.jpg"
                 />
                 <p
+                
                   class="text-uppercase d-inline"
                   style="font-family: 'Times New Roman', serif"
                 >
@@ -135,8 +136,22 @@
           <div class="row ps-1">
             <div class="col">
               <p
-                class="text-uppercase fw-bold d-inline"
+              v-if="reviewType==='DRUGS'"
+
+                class="text-uppercase fw-bold d-inline mb-0 "
                 style="font-family: 'Times New Roman', serif"
+                type='button'
+                @click="routeToInventory(review['drugId'])"
+              >
+                <span>{{review["productName"]}} </span>
+                <span class="fw-light" v-if="review['drugBrandName']!==null">&nbsp; {{review['drugBrandName']}}</span>
+              </p>
+              <p
+              v-if="reviewType==='PHARMACY'"
+
+                class="text-uppercase fw-bold d-inline mb-0 "
+                style="font-family: 'Times New Roman', serif"
+                type='button'
               >
                 {{review["productName"]}}
               </p>
@@ -250,9 +265,15 @@
 <script>
 import { review } from "../../composables/Review/Review";
 export default {
+  methods:{
+     routeToInventory(id){
+            this.$router.push({name:"InventoryHome",params: { 'loadType':'getDrug','drugId':id }})
+        },
+
+  },
   setup(props, context) {
-    const { reviewType, filterBy,reviews,replyToReview,handleScroll } = review();
-    return { reviewType, filterBy,reviews,replyToReview,handleScroll };
+    const { reviewType, filterBy,reviews,replyToReview,handleScrollForReviews } = review();
+    return { reviewType, filterBy,reviews,replyToReview,handleScrollForReviews };
   },
 };
 </script>

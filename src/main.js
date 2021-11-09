@@ -5,6 +5,7 @@ import store from "./store";
 // import 'bootstrap';
 import VueClickAway from "vue3-click-away";
 
+
 createApp(App)
   .directive("scroll", {
     beforeMount(el, binding, vnode) {

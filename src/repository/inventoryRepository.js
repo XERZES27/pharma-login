@@ -220,6 +220,25 @@ const getDrugsByDate = (pageNumber) => {
   return promise;
 };
 
+const getReviewsByDrugId = (drugId,pageNumber)=>{
+  const promise = new Promise((resolve,reject)=>{
+    axios.get(process.env.VUE_APP_HOSTADDRESS+`review/getReviewsByDrug?pageNumber=${pageNumber}&filterBy=Recent&drugId=${drugId}`,
+    {headers: store.getters.getHeader})
+    .then((response) => {
+      resolve(response.data);
+    })
+    .catch((error) => {
+      console.log(error.response);
+      if (errorMiddleWare(error)) {
+        resolve();
+        return;
+      }
+      reject(error.response.data);
+    });
+  })
+  return promise;
+}
+
 export {
   bulkUpload,
   getRecommendations,
@@ -230,4 +249,5 @@ export {
   createDrug,
   updateDrug,
   deleteDrug,
+  getReviewsByDrugId
 };

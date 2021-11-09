@@ -80,7 +80,7 @@ const router = createRouter({
 });
 
 router.afterEach((to, from) => {
-  sessionStorage.setItem("lastUrl", `${to.name}`);
+  sessionStorage.setItem("lastUrl", `${from.name}`);
 });
 
 router.beforeEach((to, from, next) => {
@@ -90,40 +90,41 @@ router.beforeEach((to, from, next) => {
     sessionStorage.removeItem("lastUrl");
     if(navigationType() == 1){
       console.log("page was reloaded")
-      router.replace({ name: `${lastUrl}` });
+      return next({ name: `${lastUrl}` });
     }
   }
 
   let deviceIsKnown, tokenIsValid, hasProfile;
   [tokenIsValid,deviceIsKnown,hasProfile ] = store.getters.getPrerequisites;
-  // console.log(tokenIsValid,deviceIsKnown,hasProfile,"router")
+  // console.log(to.name,tokenIsValid,deviceIsKnown,hasProfile,"router")
   if (
     to.name !== "CreateProfile" &&
     deviceIsKnown===true &&
     tokenIsValid===true &&
     !hasProfile
   ) {
-    next({ name: "CreateProfile" });
+    return next({ name: "CreateProfile" });
   }
   if (to.name === "CreateProfile" && hasProfile===true) {
-    next({ name: "UpdateProfile" });
+    return next({ name: "UpdateProfile" });
   }
 
-  if (to.name !== "UnknownDevice" && deviceIsKnown===false) {
+  else if (to.name !== "UnknownDevice" && deviceIsKnown===false) {
     
-    next({ name: "UnknownDevice" });
+    return next({ name: "UnknownDevice" });
   }
-  if(to.name === "Auth" && tokenIsValid===true){
-    console.log(from.name)
-    //TODO
-    // navigate to home
-    // next({name:from.name})
+  else if(to.name === "Auth" && tokenIsValid==='true'){
+    return next({ name: "InventoryHome",params:{ 'loadType':'discardSession' } });
   }
-  if (to.name !== "Auth" && to.name !== "UnknownDevice" && tokenIsValid===false) {
+  else if (to.name !== "Auth" && to.name !== "UnknownDevice" && tokenIsValid===false) {
    
     next({ name: "Auth" });
-  } else {
-    next();
+  } 
+  else if(from.name===to.name){
+    next(false)
+  }
+  else {
+    return next();
   }
 });
 

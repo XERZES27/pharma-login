@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import {
   getRecommendations,
   getDrugsAlphabetically,
@@ -8,6 +8,7 @@ import {
   createDrug,
   updateDrug,
   deleteDrug,
+  getReviewsByDrugId,
 } from "../../repository/inventoryRepository";
 
 import {
@@ -20,14 +21,48 @@ import {
   validatePrescriptionRequired,
   validateCountryOfOrigin,
 } from "../../models/drug.js";
+
+import { useRoute } from "vue-router";
 // const io = require("socket.io-client");
 // const socket = io("http://localhost:5000/",{
 //   path: "/socket.io/",
 //   extraHeaders: {
 //   }
 // });
+import store from "../../store";
+
+function navigationType() {
+  var result;
+  var p;
+
+  if (window.performance.navigation) {
+    result = window.performance.navigation;
+    if (result == 255) {
+      result = 4;
+    } // 4 is my invention!
+  }
+
+  if (window.performance.getEntriesByType("navigation")) {
+    p = window.performance.getEntriesByType("navigation")[0].type;
+
+    if (p == "navigate") {
+      result = 0;
+    }
+    if (p == "reload") {
+      result = 1;
+    }
+    if (p == "back_forward") {
+      result = 2;
+    }
+    if (p == "prerender") {
+      result = 3;
+    } //3 is my invention!
+  }
+  return result;
+}
 
 const inventoryHome = () => {
+  const currentScrollPosition = ref(0);
   const initialCreateDrugPhase = ref(true);
   const createDrugError = ref("");
   const isProcessingCreateDrugPhase = ref(false);
@@ -54,9 +89,34 @@ const inventoryHome = () => {
   const resultCameEmpty = ref("");
   const emptyInventory = ref("");
   const currentDrugToDelete = ref("");
-  const hasScrolledToBottom = ref(false)
+  const hasScrolledToBottom = ref(true);
+  var disableScrollBehavior = false;
+  const loadingInventory = ref(false);
+  const getInventoryError = ref("");
+  const route = useRoute();
+  const drugReviewsModal = ref("");
+  const currentlyLoadedDrugReviews = ref({
+    loadedReviews: [],
+    index: 0,
+    drugName: "",
+    drugBrandName: "",
+    disableNextPage: false,
+    fetchingReviews: false,
+    fetchingReviewsError: "",
+  });
   //pagination
   var pageNumber = 0;
+
+  onUnmounted(() => {
+    disableScrollBehavior = true;
+    store.dispatch("setInventoryState", {
+      drugsInSession: inventoryList.value,
+      scrollDistanceInInventory: currentScrollPosition.value,
+      pageNumberInInventory: pageNumber,
+      sortFieldInventory: pickedSort.value,
+      hasScrolledToBottomInInventory: hasScrolledToBottom.value,
+    });
+  });
 
   watch(nameModel, (newValue, oldValue) => {
     if (newValue !== "") {
@@ -72,6 +132,7 @@ const inventoryHome = () => {
           "Price Must be a Number Greater than 0 and less than 100,000";
     }
   });
+
   watch(amountInStockModel, (newValue, oldValue) => {
     if (newValue !== "") {
       if (validateInStockAmount(newValue)) amountInStockError.value = "";
@@ -101,13 +162,52 @@ const inventoryHome = () => {
     }
   });
 
-  watch(pickedSort, (newValue, oldValue) => {
-    if (newValue !== oldValue) {
-      getInventory();
-    }
-  });
   onMounted(() => {
-    getInventory();
+    if (navigationType() == 0 && route.params.loadType === undefined) {
+      // console.log("page was backed up to");
+      // console.log(store.getters.getInventoryState)
+      var [
+        drugsInSession,
+        scrollDistanceInInventory,
+        pageNumberInInventory,
+        sortFieldInventory,
+        hasScrolledToBottomInInventory,
+      ] = store.getters.getInventoryState;
+      if (drugsInSession === false) {
+        getInventory();
+      } else {
+        pickedSort.value = sortFieldInventory;
+        inventoryList.value = drugsInSession;
+        pageNumber = pageNumberInInventory;
+        hasScrolledToBottom.value = hasScrolledToBottomInInventory;
+
+        setTimeout(() => {
+          // hasScrolledToBottom.value = false;
+          window.scroll({
+            top: scrollDistanceInInventory,
+            left: 0,
+            behavior: "smooth",
+          });
+        }, 100);
+      }
+    } else {
+      if (
+        route.params.loadType === "discardSession" ||
+        route.params.loadType === undefined
+      ) {
+        getInventory();
+      }
+      if (route.params.loadType === "getDrug") {
+        queryDrugById(route.params.drugId);
+      }
+    }
+
+    watch(pickedSort, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        getInventory();
+      }
+    });
+
     confirmDeleteModalRef.value.addEventListener("hidden.bs.modal", function(
       event
     ) {
@@ -134,6 +234,23 @@ const inventoryHome = () => {
     });
   });
 
+  const handleScroll = (el) => {
+    if (
+      hasScrolledToBottom.value === false &&
+      disableScrollBehavior === false
+    ) {
+      currentScrollPosition.value = el.target.scrollingElement.scrollTop;
+      if (
+        el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
+        el.target.scrollingElement.scrollHeight
+      ) {
+        console.log("has reached the bottom");
+        getInventory("Load");
+        hasScrolledToBottom.value = true;
+      }
+    }
+  };
+
   function debounce(func, timeout = 300) {
     let timer;
     return (...args) => {
@@ -154,6 +271,7 @@ const inventoryHome = () => {
   }
 
   const processChange = debounce(() => {
+    resultCameEmpty.value = "";
     if (searchQuery.value != "") {
       return processQuery();
     } else {
@@ -218,31 +336,9 @@ const inventoryHome = () => {
     ];
   };
 
-  const preloadInventory = () => {
-    inventoryList.value.map((el) => {
-      el["isNotEditable"] = true;
-      el["updateFailed"] = false;
-      el["updateError"] = "";
-      el["updateSuccess"] = false;
-      el["deleteSuccess"] = false;
-      el["deleteFailed"] = false;
-      el["deleteError"] = "";
-      el["priceModel"] = el["price"];
-      el["amountInStockModel"] = el["amountInStock"];
-      el["requiresPrescriptionModel"] = el["requiresPrescription"];
-      el["countryOfOriginModel"] = el["countryOfOrigin"];
-      el["priceError"] = "";
-      el["amountInStockError"] = "";
-      el["requiresPrescriptionError"] = "";
-      el["countryOfOriginError"] = "";
-      el["toggleMore"] = false;
-      el["creationDate"] = new Date(el["creationDate"]).toLocaleString();
-      el["isProcessing"] = false;
-    });
-  };
-
-  const postLoadInventory = (inventory)=>{
-    var currentInventory = inventory;
+  const preloadInventory = (inventory = null) => {
+    var currentInventory = inventory === null ? inventoryList.value : inventory;
+    
     currentInventory.map((el) => {
       el["isNotEditable"] = true;
       el["updateFailed"] = false;
@@ -262,27 +358,119 @@ const inventoryHome = () => {
       el["toggleMore"] = false;
       el["creationDate"] = new Date(el["creationDate"]).toLocaleString();
       el["isProcessing"] = false;
+      el["reviewsCount"] = el["reviewsCount"];
+      el["reviewsPageNumber"] = 0;
+      el["loadedReviews"] = [];
+      el["disableNextPage"] = false;
+      el["fetchingReviews"] = false;
+      el["fetchingReviewsError"] = "";
     });
-    return currentInventory;
+    if (inventory !== null) {
+      currentInventory.map((el) => {
+        inventoryList.value.push(el);
+      });
+    }
+  };
 
+  const formatReviews = (index, reviews) => {
+    reviews.map((el) => {
+      el["showReplyBox"] = false;
+      el["replyError"] = "";
+      el["replyModel"] = el.pharmacyReply === undefined ? "" : el.pharmacyReply;
+      el["creationDate"] = new Date(el["creationDate"]).toLocaleString();
+      el["editDate"] =
+        el.editDate === undefined
+          ? ""
+          : new Date(el["editDate"]).toLocaleString();
+      el.pharmacyReply = el.pharmacyReply === undefined ? "" : el.pharmacyReply;
+      el["processing"] = false;
+    });
+    reviews.map((el) => {
+      inventoryList.value[index]["loadedReviews"].push(el);
+    });
+    currentlyLoadedDrugReviews.value["loadedReviews"] =
+      inventoryList.value[index]["loadedReviews"];
+    currentlyLoadedDrugReviews.value["index"] = index;
+    currentlyLoadedDrugReviews.value["drugName"] =
+      inventoryList.value[index]["name"];
+    currentlyLoadedDrugReviews.value["drugBrandName"] =
+      inventoryList.value[index]["brandName"];
+  };
 
-  }
+  const getReviewsForDrug = (index, Option = "load", openModal = false) => {
+    const drugId = inventoryList.value[index]["_id"];
+    if (
+      inventoryList.value[index]["disableNextPage"] === true &&
+      Option !== "reset"
+    )
+      return;
+    if (Option === "reset") inventoryList.value[index]["loadedReviews"] = [];
+    inventoryList.value[index]["fetchingReviews"] = true;
+    currentlyLoadedDrugReviews.value["fetchingReviews"] = true;
+    var pageNumber;
+    if (Option === "load") {
+      pageNumber = inventoryList.value[index]["reviewsPageNumber"];
+    } else {
+      pageNumber = 0;
+      inventoryList.value[index]["reviewsPageNumber"] = 0;
+      inventoryList.value[index]["loadedReviews"] = [];
+    }
+
+    getReviewsByDrugId(drugId, pageNumber)
+      .then((response) => {
+        inventoryList.value[index]["fetchingReviews"] = false;
+        currentlyLoadedDrugReviews.value["fetchingReviews"] = false;
+        if (response.data.length !== 0) {
+          if (response.data.length < 10) {
+            inventoryList.value[index]["disableNextPage"] = true;
+            currentlyLoadedDrugReviews.value["disableNextPage"] = true;
+          } else
+            inventoryList.value[index]["reviewsPageNumber"] = pageNumber + 1;
+          formatReviews(index, response.data);
+          if (pageNumber === 0 && openModal === true) {
+            drugReviewsModal.value.showDrugReviewModal();
+          }
+        } else {
+          inventoryList.value[index]["disableNextPage"] = true;
+          currentlyLoadedDrugReviews.value["disableNextPage"] = true;
+        }
+      })
+      .catch((error) => {
+        inventoryList.value[index]["fetchingReviews"] = false;
+        inventoryList.value[index]["fetchingReviewsError"] =
+          "Couldn`t fetch reviews, Try Again...";
+        currentlyLoadedDrugReviews.value["fetchingReviews"] = false;
+        currentlyLoadedDrugReviews.value["fetchingReviewsError"] =
+          "Couldn`t fetch reviews, Try Again...";
+
+        setTimeout(() => {
+          inventoryList.value[index]["fetchingReviewsError"] = "";
+          currentlyLoadedDrugReviews.value["fetchingReviewsError"] = "";
+        }, 5000);
+      });
+  };
 
   const queryDrugById = (id) => {
+    loadingInventory.value = true;
     getDrugById(id)
       .then((response) => {
+        loadingInventory.value = false;
         if (response.data.length !== 0) {
           inventoryList.value = response.data;
           hasScrolledToBottom.value = true;
           preloadInventory();
         } else {
           resultCameEmpty.value = `Well this is awkward (・_・ヾ`;
+          if (route.params.drugId !== undefined) {
+            emptyInventory.value = "The Drug Is No Longer In Your Inventory";
+          }
           setTimeout(() => {
             resultCameEmpty.value = "";
-          }, 10000);
+          }, 5000);
         }
       })
       .catch((error) => {
+        loadingInventory.value = false;
         console.log(error);
       });
     drugRecomendations.value = [];
@@ -293,13 +481,13 @@ const inventoryHome = () => {
         .then((response) => {
           if (response.data.length !== 0) {
             inventoryList.value = response.data;
-          hasScrolledToBottom.value = true;
+            hasScrolledToBottom.value = true;
             preloadInventory();
           } else {
             resultCameEmpty.value = `Sorry we couldn't find anything ¯\\_(ツ)_/¯`;
             setTimeout(() => {
               resultCameEmpty.value = "";
-            }, 10000);
+            }, 3000);
           }
         })
         .catch((error) => {
@@ -309,46 +497,41 @@ const inventoryHome = () => {
     drugRecomendations.value = [];
   };
 
-  const loadData = (response,Options)=>{
-    
-    if(response.data.length!==0){
+  const loadData = (response, Options) => {
+    if (response.data.length !== 0) {
       pageNumber += 1;
-      hasScrolledToBottom.value = false
-      if(Options==="reset"){
+      if (Options === "reset") {
         inventoryList.value = response.data;
         preloadInventory();
+      } else {
+        preloadInventory(response.data);
       }
-      else{
-        
-        
-        var toInventory = postLoadInventory(response.data)
-        toInventory.map((el)=>{
-          inventoryList.value.push(el)
-        })
-
-      }
-      
-      
-    }
-    else {
+      hasScrolledToBottom.value = false;
+    } else {
       emptyInventory.value =
         "Your Inventory Is Currently Empty, Press The Upload Button To Import Data From An Excel(.xlsx) File Or Press The Add Button To Create A Single Drug";
     }
-  }
-  const getInventory = async (Options="reset") => {
-    if(Options==="reset")pageNumber = 0;
-    
+  };
+  const getInventory = async (Options = "reset") => {
+    if (Options === "reset") pageNumber = 0;
+    loadingInventory.value = true;
     emptyInventory.value = "";
     if (pickedSort.value == "Alphabetically") {
       getDrugsAlphabetically(pageNumber)
-        .then((response) => loadData(response,Options))
+        .then((response) => {
+          loadingInventory.value = false;
+          loadData(response, Options);
+        })
         .catch((error) => {
           console.log(error);
         });
     }
     if (pickedSort.value == "By Date") {
       getDrugsByDate(pageNumber)
-        .then((response) => loadData(response,Options))
+        .then((response) => {
+          loadingInventory.value = false;
+          loadData(response, Options);
+        })
         .catch((error) => {
           console.log(error);
         });
@@ -382,16 +565,14 @@ const inventoryHome = () => {
       brandNameModel.value === "" ? null : brandNameModel.value,
       countryOfOriginModel.value === "" ? null : countryOfOriginModel.value,
     ]);
-    if(drug ===false){
+    if (drug === false) {
       hasErrors = true;
-      }
+    }
     if (!hasErrors) {
       createDrugIsSuccessfull.value = false;
       initialCreateDrugPhase.value = false;
       isProcessingCreateDrugPhase.value = true;
-      createDrug(
-        drug
-      )
+      createDrug(drug)
         .then((response) => {
           createDrugIsSuccessfull.value = true;
           initialCreateDrugPhase.value = true;
@@ -402,7 +583,6 @@ const inventoryHome = () => {
           isProcessingCreateDrugPhase.value = false;
           initialCreateDrugPhase.value = true;
           if (error.status === "Invalid Data") {
-            console.log(error.data);
             const errKeys = Object.keys(error.data);
             if (errKeys.includes("repetitionError"))
               createDrugError.value =
@@ -410,7 +590,8 @@ const inventoryHome = () => {
             if (errKeys.includes("validationError"))
               createDrugError.value = "Validation Errors Occured In Server";
           } else if (error.status === "drug is required") {
-            createDrugError.value = "Something went wrong while data was being sent";
+            createDrugError.value =
+              "Something went wrong while data was being sent";
           } else {
             console.log(error);
             createDrugError.value = "Please Check Your Connection";
@@ -550,6 +731,13 @@ const inventoryHome = () => {
             ] = `Please Check Your Connection`;
           }
         });
+    } else if (updateJsonKeys.length === 0) {
+      inventoryList.value[index]["updateFailed"] = true;
+      inventoryList.value[index]["updateError"] = `Drug Has Not Been Edited`;
+      setTimeout(() => {
+        inventoryList.value[index]["updateFailed"] = false;
+        inventoryList.value[index]["updateError"] = "";
+      }, 2000);
     }
   };
 
@@ -585,6 +773,7 @@ const inventoryHome = () => {
   };
 
   return {
+    currentScrollPosition,
     initialCreateDrugPhase,
     createDrugError,
     isProcessingCreateDrugPhase,
@@ -624,6 +813,12 @@ const inventoryHome = () => {
     performCreate,
     performUpdate,
     performDelete,
+    handleScroll,
+    loadingInventory,
+    getInventoryError,
+    getReviewsForDrug,
+    drugReviewsModal,
+    currentlyLoadedDrugReviews,
   };
 };
 

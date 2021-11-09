@@ -28,7 +28,7 @@
                           Profile
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <li><a class="dropdown-item" href="#">Edit Profile</a></li>
+                          <li><a class="dropdown-item"  href="#" @click="routeToUpdateInventory">Edit Profile</a></li>
                           <li><hr class="dropdown-divider"></li>
                           <li><a @click="logout" class="dropdown-item text-danger" href="#" >Log Out</a></li>
                         </ul>
@@ -48,8 +48,11 @@ import 'bootstrap';
 import store from '../store';
 export default {
     methods:{
+        routeToUpdateInventory(){
+            this.$router.push({name:'UpdateProfile'})
+        },
         routeToInventory(){
-            this.$router.push({name:"InventoryHome"})
+            this.$router.push({name:"InventoryHome",params: { 'loadType':'discardSession' }})
         },
         routeToReview(){
             this.$router.push({name:"Review"})
@@ -59,7 +62,7 @@ export default {
         },
         logout(){
             store.dispatch("logout").then((_)=>{
-                this.$router.push({name:"Auth"})
+                this.$router.replace({name:"Auth"})
             })
         }
     }

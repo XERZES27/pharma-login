@@ -490,25 +490,26 @@
           row
           align-items-center
           text-start
-          mb-5
+          mb-4
           d-flex
           justify-content-end
         "
-        id="Heading"
+        
       >
         <div
           class="
             col-md-12
             py-4
-            ps-5
+            ps-md-5 ps-2
             display-4
             d-flex
             justify-content-between
             align-items-end
           "
+          id="Heading"
         >
           <span class="me-1">{{ notificationType }}</span>
-          <div class="d-inline me-4 d-flex justify-content-end">
+          <div class="d-inline me-md-4 me-1 d-flex justify-content-end">
             <div class="d-inline me-2">
               <input
                 type="radio"
@@ -597,6 +598,8 @@
             <div class="row w-100 mt-2">
               <div class="col d-flex justify-content-between">
                 <p
+                type='button'
+                @click="routeToInventory(notification['drugId'])"
                   v-if="notification['brandName'] === ''"
                   class="d-inline mt-2 ps-2 fs-4"
                   style="font-family: 'Times New Roman', serif"
@@ -604,6 +607,8 @@
                   {{ notification["name"] }}
                 </p>
                 <p
+                type='button'
+                @click="routeToInventory(notification['drugId'])"
                   v-else
                   class="d-inline mt-2 ps-2 fs-4"
                   style="font-family: 'Times New Roman', serif"
@@ -893,6 +898,9 @@
 import { notification } from "../../composables/Notification/Notification";
 export default {
   methods: {
+    routeToInventory(id){
+            this.$router.push({name:"InventoryHome",params: { 'loadType':'getDrug','drugId':id }})
+        },
     toggleShowReplyBox(index) {
       if (this.notifications[index]["showReplyBox"] === false) {
         this.notifications[index]["showReplyBox"] = true;

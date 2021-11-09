@@ -1,4 +1,6 @@
 import { createStore } from "vuex";
+import { inventoryStore } from "./inventoryStore";
+import { notificationStore } from "./notificationStore";
 
 export default createStore({
   state: {
@@ -47,10 +49,13 @@ export default createStore({
       state.deviceIsKnown = false;
     },
     setTokenFalse(state) {
-      const sessionTokenIsValid = sessionStorage.setItem(
+      const sessionTokenIsValid = sessionStorage.removeItem(
         `tokenIsValid`,
-        false
       );
+      const sessionId = sessionStorage.removeItem('id')
+      const sessionToken = sessionStorage.removeItem('token')
+      state.id = undefined;
+      state.token = undefined
       state.tokenIsValid = false;
     },
     setHasProfileFalse(state) {
@@ -130,5 +135,5 @@ export default createStore({
         
     }
   },
-  modules: {},
+  modules: {'inventoryStore':inventoryStore,'notificationStore':notificationStore},
 });

@@ -1,9 +1,14 @@
 <template>
-  <h1>Update Profile</h1>
+  <ProfileComponent></ProfileComponent>
 </template>
 
 <script>
+import ProfileComponent from '../../components/profile/EditProfileForm.vue'
 export default {
+  name:"UpdateProfile",
+  components: {
+    ProfileComponent
+  }
 
 }
 </script>

@@ -82,7 +82,7 @@ const formValidation = () => {
                 if (!responseData["hasProfile"]) {
                   router.replace({ name: "CreateProfile" });
                 } else {
-                  router.replace({ name: "InventoryHome" });
+                  router.replace({ name: "InventoryHome",params:{ 'loadType':'discardSession' } });
                 }
               });
           }

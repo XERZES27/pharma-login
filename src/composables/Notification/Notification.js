@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted,onUnmounted } from "vue";
 import {
   getSubscriptions,
   getRequests,
@@ -11,7 +11,7 @@ import {
   getRecommendations,
 } from "../../repository/inventoryRepository";
 import { Modal } from "bootstrap";
-
+import store from "../../store";
 const notification = () => {
   const loadedNotificationType = ref("Subscriptions");
   const notificationType = ref("Subscriptions");
@@ -22,7 +22,7 @@ const notification = () => {
   const isProcessing = ref(false);
   var pageNumber = 0;
   var currentDateAccordingToServer = Date.now();
-  var hasScrolledToBottom = false;
+  var hasScrolledToBottom = true;
   const defaultRestockAmount = 10;
   const currentSubscriptionToRestock = ref("");
   const currentRequest = ref("");
@@ -41,6 +41,20 @@ const notification = () => {
   var requestDeclineModal = null;
   var searchDrugModal = null;
   var deleteDeclineModal = null;
+  var disableScrollBehavior = false;
+  const currentScrollPosition = ref(0);
+
+  onUnmounted(() => {
+    disableScrollBehavior = true;
+    store.dispatch("setNotificationState", {
+      notificationsInSession: notifications.value,
+      scrollDistanceInNotification: currentScrollPosition.value,
+      pageNumberInNotification: pageNumber,
+      notificationTypeInNotification:notificationType.value,
+      sortFieldNotification: filterBy.value,
+      hasScrolledToBottomInNotification: hasScrolledToBottom.value,
+    });
+  });
 
   function debounce(func, timeout = 300) {
     let timer;
@@ -86,6 +100,19 @@ const notification = () => {
   };
 
   onMounted(() => {
+
+
+
+
+    watch(notificationType, (newValue, oldValue) => {
+      pageNumber = 0;
+      getNotifications("reset");
+    });
+  
+    watch(filterBy, (newValue, oldValue) => {
+      pageNumber = 0;
+      getNotifications("reset");
+    });
     confirmRestockModalRef.value.addEventListener("hidden.bs.modal", function(
       event
     ) {
@@ -135,15 +162,7 @@ const notification = () => {
     getNotifications("reset");
   });
 
-  watch(notificationType, (newValue, oldValue) => {
-    pageNumber = 0;
-    getNotifications("reset");
-  });
 
-  watch(filterBy, (newValue, oldValue) => {
-    pageNumber = 0;
-    getNotifications("reset");
-  });
 
   const getNotifications = (Options = "reset") => {
     const getNotifictionType =
@@ -230,7 +249,6 @@ const notification = () => {
           el["replyModel"] = el["declineDescription"];
         }
       });
-      console.log(valueToBeParsed)
     }
     loadedNotificationType.value = notificationType.value;
 
@@ -476,7 +494,8 @@ const notification = () => {
   };
 
   const handleScroll = (el) => {
-    if (hasScrolledToBottom === false) {
+    if (hasScrolledToBottom === false&&disableScrollBehavior===false) {
+      currentScrollPosition.value = el.target.scrollingElement.scrollTop;
       if (
         el.target.scrollingElement.scrollTop + el.path[1].innerHeight + 30 >
         el.target.scrollingElement.scrollHeight

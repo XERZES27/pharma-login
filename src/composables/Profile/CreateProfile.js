@@ -1,13 +1,20 @@
 import { ref, watch, onMounted, onUnmounted, computed } from "vue";
-import { createProfile } from "../../repository/profileRepository";
+import {
+  createProfile,
+  getProfile,
+  deletePhoto,
+  updateProfile,
+} from "../../repository/profileRepository";
 import { Loader } from "@googlemaps/js-api-loader";
-import { Toast } from "bootstrap";
+import { Toast, Modal } from "bootstrap";
 import { useGeolocation } from "@/composables/Profile/useGeolocation.js";
-import store from '../../store/index';
-import router from '../../router/index'
+import store from "../../store/index";
+import router from "../../router/index";
+import { useRoute } from "vue-router";
 
 const profile = () => {
   const GOOGLE_MAPS_API_KEY = process.env.VUE_APP_MAPKEY;
+  const route = useRoute();
   let markers = [];
   const profileForm = ref("");
   const nameModel = ref("");
@@ -28,12 +35,18 @@ const profile = () => {
   const dialog = ref(false);
   const acceptReq = ref(true);
   const showMap = ref(false);
+  let mapModal = false;
+  let tempLocation = 0;
   const imagesList = ref([]);
+  const loadedImagesFromRepo = ref([]);
+  const imagesFromRepoToBeDeleted = ref([]);
+  const dataFromRepo = ref(null);
   const model = ref({
     username: "",
   });
   const loading = ref(false);
-  const errorMessage = ref('');
+  const disableSubmit = ref(true);
+  const errorMessage = ref("");
   const rules = {
     username: [
       {
@@ -52,16 +65,87 @@ const profile = () => {
   const mapDiv = ref(null);
   let map = ref(null);
   let clickListener = null;
-  let locationValidation = ref('');
+  let locationValidation = ref("");
   const otherPos = ref(null);
   const imageicn = ref(null);
   const showValidation = ref(false);
 
+  const loadProfile = async () => {
+    return new Promise((resolve, reject) => {
+      getProfile()
+        .then((response) => {
+          dataFromRepo.value = response.data;
+          nameModel.value = response.data.name;
+          locationDescriptionModel.value = response.data.locationDescription;
+          acceptsRequestsModel.value = response.data.acceptsRequests;
+          var initialLocation = response.data.location.coordinates;
+          var initialPos = { lat: initialLocation[0], lng: initialLocation[1] };
+          loadedImagesFromRepo.value = response.data.pharmacyPhotos;
+
+          addMarker(initialPos);
+          resolve(initialPos);
+        })
+        .catch((error) => {
+          console.log("error ", error);
+        });
+    });
+  };
+
+  const removePhotoFromRepo = async (index) => {
+    imagesFromRepoToBeDeleted.value.push(loadedImagesFromRepo.value[index]);
+    loadedImagesFromRepo.value.splice(index, 1);
+
+    // deletePhoto(loadedImagesFromRepo.value[index])
+    //   .then((result) => {
+    //     loadedImagesFromRepo.value.splice(index, 1);
+    //     console.log(result.data);
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+  };
+
   //* On mounted map is initialized with and a click listener is attached.
   onMounted(async () => {
     await loader.load();
+    var initialPos;
+    if (route.path === "/updateProfile") {
+      loading.value = true;
+      initialPos = await loadProfile();
+      loading.value = false;
+      watch(
+        [
+          location,
+          locationDescriptionModel,
+          acceptsRequestsModel,
+          imagesFromRepoToBeDeleted,
+          imagesList,
+          loadedImagesFromRepo,
+        ],
+        (newValue, oldValue) => {
+          if (
+            dataFromRepo.value.location.coordinates[0] !==
+              newValue[0].latitude ||
+            dataFromRepo.value.location.coordinates[1] !==
+              newValue[0].longitude ||
+            dataFromRepo.value.locationDescription !== newValue[1] ||
+            dataFromRepo.value.acceptsRequests !== newValue[2] ||
+            newValue[3].length !== 0 ||
+            newValue[4].length !== 0
+          ) {
+            disableSubmit.value = false;
+          } else {
+            disableSubmit.value = true;
+          }
+          if (newValue[4].length + newValue[5].length === 0) {
+            disableSubmit.value = true;
+          }
+        },
+        { deep: true }
+      );
+    }
     map.value = new google.maps.Map(mapDiv.value, {
-      center: currPos.value,
+      center: route.path === "/updateProfile" ? initialPos : currPos.value,
       zoom: 16,
     });
     clickListener = map.value.addListener(
@@ -73,9 +157,10 @@ const profile = () => {
     );
     //* Custom marker icon for the map.
     imageicn.value = {
-      url: "https://i.im.ge/2021/07/21/seFIh.png",
+      // url: "https://i.im.ge/2021/07/21/seFIh.png",
+      url: require("../../assets/pharmacy_marker_small.png"),
       // This marker is 20 pixels wide by 32 pixels high.
-      size: new google.maps.Size(33, 37),
+      size: new google.maps.Size(32, 36),
       // The origin for this image is (0, 0).
       origin: new google.maps.Point(0, 0),
       // The anchor for this image is the base of the flagpole at (0, 37).
@@ -85,80 +170,126 @@ const profile = () => {
     //* For Form Valdiation.
     var forms = document.querySelectorAll(".needs-validation");
     Array.prototype.slice.call(forms).forEach(function(form) {
-      form.addEventListener(
-        "submit",
-        function(event) {
-            
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            if(!location.value){
-                locationValidation.value.classList.add("text-danger");
-            }
-            console.log('prevent propagation')
-          }else{
-              
-                sendFile()
-                  
-                  
+      form.addEventListener("submit", function(event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (!location.value) {
+            locationValidation.value.classList.add("text-danger");
           }
+        } else {
+          sendFile();
+        }
 
-          form.classList.add("was-validated");
-          
-          showValidation.value = true;
-        },
-      );
+        form.classList.add("was-validated");
+
+        showValidation.value = true;
+      });
     });
+    route.path === "/updateProfile" && addMarker(initialPos);
   });
-
-  
 
   //* On unmounted the map click listner is removed
   onUnmounted(async () => {
     if (clickListener) clickListener.remove();
   });
 
-  const sendFile = ()=>{
-    console.log("reh")
-    loading.value = true;
-    var imgs = []
+  const acceptUpdatedValues = (response) => {
+    Object.keys(response.updatedValues).map((key) => {
+      dataFromRepo.value[key] = response.updatedValues[key];
+    });
+    response.addedPhotos.map((el) => {
+      loadedImagesFromRepo.value.push(el);
+
+      // dataFromRepo.value.pharmacyPhotos.push(el)
+    });
+    response.removedPhotos.map((el) => {
+      loadedImagesFromRepo.value.filter((value) => {
+        return value !== el;
+      });
+      dataFromRepo.value.pharmacyPhotos.filter((value) => {
+        return value !== el;
+      });
+    });
+    imagesFromRepoToBeDeleted.value = [];
+  };
+
+  const sendFile = () => {
+    var imgs = [];
     var bodyFormData = new FormData();
-    imagesList.value.map((el)=>{
-                   imgs.push(el['blob'])
-                   bodyFormData.append('file',el['blob'],el['name'])
+    imagesList.value.map((el) => {
+      imgs.push(el["blob"]);
+      bodyFormData.append("file", el["blob"], el["name"]);
+    });
+
+    route.path === "/createProfile" &&
+      bodyFormData.set("name", nameModel.value);
+    if (route.path === "/updateProfile") {
+      if (
+        dataFromRepo.value.location.coordinates[0] !==
+          location.value.latitude ||
+        dataFromRepo.value.location.coordinates[1] !== location.value.longitude
+      ) {
+        bodyFormData.set(
+          "location",
+          JSON.stringify([location.value.latitude, location.value.longitude])
+        );
+      }
+
+      if (
+        dataFromRepo.value.locationDescription !==
+        locationDescriptionModel.value
+      ) {
+        bodyFormData.set("locationDescription", locationDescriptionModel.value);
+      }
+
+      if (dataFromRepo.value.acceptsRequests !== acceptsRequestsModel.value) {
+        bodyFormData.set("acceptsRequests", acceptsRequestsModel.value);
+      }
+      if (imagesFromRepoToBeDeleted.value.length !== 0) {
+        bodyFormData.set(
+          "photosToDelete",
+          JSON.stringify(imagesFromRepoToBeDeleted.value)
+        );
+      }
+    } else {
+      bodyFormData.set(
+        "location",
+        JSON.stringify([location.value.latitude, location.value.longitude])
+      );
+      bodyFormData.set("acceptsRequests", acceptsRequestsModel.value);
+      bodyFormData.set("locationDescription", locationDescriptionModel.value);
+    }
+    const func =
+      route.path === "/updateProfile" ? updateProfile : createProfile;
+    imagesList.value = [];
+    loading.value = true;
+
+    func(bodyFormData)
+      .then((response) => {
+        loading.value = false;
+
+        if (route.path === "/updateProfile") {
+          acceptUpdatedValues(response.data);
+          disableSubmit.value = true;
+        }
       })
-    
-    bodyFormData.set('name',nameModel.value);
-    bodyFormData.set('location',JSON.stringify([location.value.latitude,location.value.longitude]))
-    bodyFormData.set('acceptsRequests',acceptsRequestsModel.value)
-    bodyFormData.set('locationDescription',locationDescriptionModel.value)
-    
-    
-    createProfile(bodyFormData)
-    .then((response)=>{
+      .catch((error) => {
         loading.value = false;
-        
-    })
-    .catch((error)=>{
-        loading.value = false;
-        if(error.status){
-          if(error.status = "Failed to upload all images"){
+        if (error.status) {
+          if ((error.status = "Failed to upload all images")) {
             errorMessage.value = "Please Try Again";
             return;
           }
-          if(error.status = "Fail"){
+          if ((error.status = "Fail")) {
             errorMessage.value = "Please Contact The Developers";
             return;
           }
           errorMessage.value = error.status;
-
         }
-    })
-    
-     
-  }
-
+      });
+  };
 
   const loader = new Loader({
     apiKey: GOOGLE_MAPS_API_KEY,
@@ -173,7 +304,6 @@ const profile = () => {
 
   //* Shows error toast.
   const showToast = () => {
-    console.log("isSized");
     var toast = new Toast(toastDiv.value);
     toast.show();
   };
@@ -185,7 +315,7 @@ const profile = () => {
       position: coords,
       map: map.value,
       icon: imageicn.value,
-      title: "aman",
+      title: "Marker",
     });
     markers.push(marker);
     location.value = {
@@ -217,6 +347,23 @@ const profile = () => {
     active
       ? body.classList.add("modal-open")
       : body.classList.remove("modal-open");
+  };
+  const setNewCoordinates = () => {
+    mapModal.hide();
+  };
+
+  const openMap = () => {
+    tempLocation = location.value;
+    mapModal = new Modal(document.getElementsByClassName("mapModal")[0], {
+      keyboard: false,
+    });
+    mapModal.show();
+  };
+
+  const closeMap = () => {
+    location.value = tempLocation;
+    addMarker({ lat: location.value.latitude, lng: location.value.longitude });
+    mapModal.hide();
   };
 
   //* Load the images selected and give it to the cropper modal.
@@ -282,28 +429,10 @@ const profile = () => {
     imagesList.value.splice(place, 1);
   };
 
-  
-
-  const submit = async () => {
-    // let valid = await profileForm.value.validate();
-    // if (!valid) {
-    //   return;
-    // }
-    // console.log(profileForm.value);
-    // loading.value = true;
-    // await simulateSubmit();
-    // loading.value = false;
-    // if (
-    //   model.username === validCredentials.username &&
-    //   model.password === validCredentials.password
-    // ) {
-    //   $message.success("Submit successfull");
-    // } else {
-    //   $message.error("Username or password is invalid");
-    // }
-  };
-
   return {
+    setNewCoordinates,
+    openMap,
+    closeMap,
     profileForm,
     nameModel,
     nameError,
@@ -315,14 +444,16 @@ const profile = () => {
     acceptReq,
     showMap,
     imagesList,
+    loadedImagesFromRepo,
     model,
     loading,
+    disableSubmit,
     errorMessage,
     rules,
     crop,
     loadImage,
     handleRemove,
-    submit,
+    removePhotoFromRepo,
     active,
     activeMap,
     modalToggle,
