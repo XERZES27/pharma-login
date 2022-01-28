@@ -1,30 +1,29 @@
 <template>
   <div class="whole">
-    <form @submit.prevent="submitForm" novalidate id="loginForm">
+    <form @submit.prevent="submitForm" novalidate>
       <label>Email: </label>
-      <input id="loginEmailInput" type="email" required v-model="email" />
+      <input type="email" required v-model="email" class="email"/>
       <div v-if="emailError.length != 0" class="error">{{ emailError }}</div>
       <label>Password: </label>
       <div class="passwordeye">
         <input
-          id="loginPasswordInput"
           type="password"
           ref="refshowpassword"
+          class="password"
           required
           v-model="password"
         />
         <span class="showpassword" @click="togglePassword">show password</span>
       </div>
 
-      <div v-if="passwordError.length != 0" class="error passwordError">
+      <div v-if="passwordError.length != 0" class="error">
         {{ passwordError }}
       </div>
       <div class="term">
         <input
           type="checkbox"
-          class="termsAndConditionsCheckBox"
           name=""
-          id=""
+          id="checkBox"
           required
           v-model="termsAndConditions"
         />
@@ -53,6 +52,7 @@ export default {
   beforeUnmount() {
     document.querySelector("body").setAttribute("style", "background:#FBFEFF");
   },
+  
 
   setup(props) {
     const {

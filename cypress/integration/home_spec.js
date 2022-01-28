@@ -30,7 +30,7 @@ describe("Home page", () => {
     // so we must tell it to visit our website with the `cy.visit()` command.
     // Since we want to visit the same URL at the start of all our tests,
     // we include it in our beforeEach function so that it runs before each test
-    // cy.visit("/inventory");
+    cy.visit("/inventory");
     // cy.get(".email")
     //   .type("sibtesh@gmail.com")
     //   .should("have.value", "sibtesh@gmail.com");
@@ -39,7 +39,7 @@ describe("Home page", () => {
     //   .should("have.value", "dafdsfdD2%");
     // cy.get("input[type=checkbox]").check();
     // cy.get(".submitButton").click();
-    cy.login("sibtesh@gmail.com", "dafdsfdD2%");
+    // cy.login("sibtesh@gmail.com", "dafdsfdD2%");
     // setCookie("machineId", machineId, {
     //   samesite: "strict",
     //   "Max-Age": `${maxAge}`,
@@ -101,6 +101,7 @@ describe("Home page", () => {
       .get("#Sure-Delet")
       .click();
   });
+
   it.only("Edit drug", () => {
     // cy.createDrug();
     cy.get("#Search-Input").type("new");
@@ -120,5 +121,6 @@ describe("Home page", () => {
     cy.get("#Edit-Price").type("66");
     cy.get("#Edit-Amount").clear();
     cy.get("#Edit-Amount").type("99");
+    cy.get(".btn-success").click();
   });
 });
