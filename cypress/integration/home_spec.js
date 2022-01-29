@@ -118,9 +118,9 @@ describe("Home page", () => {
       .first()
       .click({ scrollBehavior: "center" });
     cy.get("#Edit-Price").clear();
-    cy.get("#Edit-Price").type("66");
+    cy.get("#Edit-Price").type(Math.floor(Math.random() * 1001) + 20);
     cy.get("#Edit-Amount").clear();
-    cy.get("#Edit-Amount").type("99");
+    cy.get("#Edit-Amount").type(Math.floor(Math.random() * 100) + 1);
     cy.get(".btn-success").click();
   });
 });

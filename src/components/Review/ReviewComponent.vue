@@ -204,6 +204,7 @@
                 @click="reviews[index].showReplyBox = true"
                 class="btn btn-outline-secondary px-5 shadow-none"
                 style="border: none"
+                :id="[review['pharmacyReply']===''? 'Reply-Btn': 'Edit-Reply-Btn']"
               >
                 <i class="bi bi-reply-all-fill"></i>
                 {{review["pharmacyReply"]===''?'Reply':'Edit Reply'}}
@@ -223,6 +224,7 @@
                 @click="replyToReview(index)"
                 class="btn btn-outline-secondary  shadow-none"
                 style="border: none"
+                id="Send-Btn"
               >
                 <i class="bi bi-arrow-right-circle"></i>
                 Send

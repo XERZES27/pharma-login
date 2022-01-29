@@ -651,6 +651,7 @@
                   type="button"
                   class="btn btn-dark shadow-none"
                   style="border: none"
+                  id="Restock-Btn"
                 >
                   <input
                     type="number"
@@ -662,6 +663,7 @@
                       backgroundcolor: #edf2fa;
                       border-radius: 5px;
                     "
+                    id="Restock-Input"
                   />
                   <div class="restockButton d-inline" @click="restock(index)" type="button" >
                     <i class="d-inline bi bi-reply-all-fill me-2"></i>
