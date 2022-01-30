@@ -33,7 +33,7 @@ describe("Notifiaction Page", () => {
     // cy.login("sibtesh@gmail.com", "dafdsfdD2%");
     cy.visit("/notification");
   });
-  it.only("Restock drug", () => {
+  it("Restock drug", () => {
     cy.get("button")
       .get("#Restock-Input")
       //   .should("have.class", ".me-2")
@@ -43,37 +43,53 @@ describe("Notifiaction Page", () => {
       .get("#Restock-Input")
       //   .should("have.class", ".me-2")
       .type(Math.floor(Math.random() * 100) + 1, { force: true });
+    cy.wait(400);
     cy.get("#Restock-Btn").click();
+    cy.wait(400);
     cy.get("h5").contains("ARE YOU SURE?");
     cy.get(".btn-success")
       .contains("RESTOCK")
       .click();
   });
 
-  it("Reply to review", () => {
-    // cy.get("#Reply-Btn").click();
-    cy.get("#Reply-Btn").click();
-    cy.scrollTo("top");
-    cy.wait(1000);
-    cy.get(".text-dark").type(
-      "Response " + Math.floor(Math.random() * 100) + 1
-    );
-    cy.get("#Send-Btn").click();
+  it("Submit Request", () => {
+    cy.get("label")
+      .contains("REQUESTS")
+      .click();
+    cy.get(".submitADrug")
+      .contains("SUBMIT A DRUG")
+      .click();
+    cy.get(".searchDrugInputForSubmit").clear();
+    cy.get(".searchDrugInputForSubmit").type("chl");
+    cy.get(".card-title")
+      .first()
+      .click({ force: true });
+    cy.get(".submitDrugToRequestButton").click();
   });
 
-  it("Edit Reply to review", () => {
-    // cy.get("#Reply-Btn").click();
-    cy.get("#Edit-Reply-Btn").click();
-    // cy.scrollTo("top");
-    cy.wait(1000);
-    cy.get(".text-dark").clear();
-    cy.wait(1000);
-    cy.get(".text-dark")
-      .scrollIntoView()
-      .type("Response " + Math.floor(Math.random() * 100) + 1);
-    cy.wait(1000);
-    cy.get("#Send-Btn")
-      .scrollIntoView()
+  it("Decline Submitted Request", () => {
+    cy.get("label")
+      .contains("REQUESTS")
       .click();
+    cy.get(".declineRequestButton")
+      .first()
+      .click();
+    cy.get(".declineReplyBox").clear();
+    cy.get(".declineReplyBox").type("Some reason");
+    cy.contains("Submit Decline").click();
+    cy.get(".confirmDeclineRequestButton").click();
+  });
+
+  it.only("Delete decline", () => {
+    cy.get("label")
+      .contains("REQUESTS")
+      .click();
+    cy.get(".deleteRequestDeclineButton")
+      .first()
+      .click();
+    cy.wait(500);
+    cy.get(".confirmDeleteDeclineRequestButton").click();
+    cy.wait(500);
+    cy.scrollTo("top");
   });
 });

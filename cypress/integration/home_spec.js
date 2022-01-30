@@ -30,6 +30,7 @@ describe("Home page", () => {
     // so we must tell it to visit our website with the `cy.visit()` command.
     // Since we want to visit the same URL at the start of all our tests,
     // we include it in our beforeEach function so that it runs before each test
+    // cy.login("sibtesh@gmail.com", "dafdsfdD2%");
     cy.visit("/inventory");
     // cy.get(".email")
     //   .type("sibtesh@gmail.com")
@@ -102,7 +103,7 @@ describe("Home page", () => {
       .click();
   });
 
-  it.only("Edit drug", () => {
+  it("Edit drug", () => {
     // cy.createDrug();
     cy.get("#Search-Input").type("new");
     cy.get(".card-title")
@@ -122,5 +123,13 @@ describe("Home page", () => {
     cy.get("#Edit-Amount").clear();
     cy.get("#Edit-Amount").type(Math.floor(Math.random() * 100) + 1);
     cy.get(".btn-success").click();
+  });
+
+  it.only("Upload drugs excel", () => {
+    cy.get("#upload-button").click();
+    cy.wait(500);
+    cy.get("input[type=file]").selectFile("cypress/fixtures/example.json", {
+      force: true,
+    });
   });
 });
