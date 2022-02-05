@@ -61,9 +61,9 @@ describe("Home page", () => {
   //     // cy.setLocalStorage("accessToken", "body.accessToken");
   //     cy.visit("/inventory");
   //   });
-  it("add item", () => {
+  it("add drug", () => {
     cy.get("#add-button").click();
-    cy.get(".show").contains("Add Drug");
+    cy.contains("Add Drug");
     cy.get("#Add-Drug-Input")
       .type("new drug")
       .should("have.value", "new drug");
@@ -87,8 +87,64 @@ describe("Home page", () => {
     );
     cy.get("#Cancel-Btn").click();
   });
+
+  it("add existing drug", () => {
+    cy.get("#add-button").click();
+    cy.contains("Add Drug");
+    cy.get("#Add-Drug-Input")
+      .type("existing drug")
+      .should("have.value", "existing drug");
+    cy.get("#Add-Price")
+      .type(100)
+      .should("have.value", 100);
+    cy.get("#Add-Amount")
+      .type(12)
+      .should("have.value", 12);
+    cy.get("input[type=checkbox]").check({ force: true });
+    cy.get("#Add-Desc").type("Will cure your death");
+    cy.get("#Add-Brand")
+      .type("habesha")
+      .should("have.value", "habesha");
+    cy.get("#Add-Origin")
+      .type("eth")
+      .should("have.value", "eth");
+    cy.get("#Create-Btn").click();
+    cy.get(".text-success").contains(
+      "Congratulation, The Drug Has been Added to your"
+    );
+    cy.get("#Cancel-Btn").click();
+    // Enter drug again
+    cy.visit("/inventory");
+    cy.get("#add-button")
+      .scrollIntoView()
+      .click({ force: true });
+    cy.contains("Add Drug");
+    cy.get("#Add-Drug-Input")
+      .type("existing drug")
+      .should("have.value", "existing drug");
+    cy.get("#Add-Price")
+      .type(100)
+      .should("have.value", 100);
+    cy.get("#Add-Amount")
+      .type(30)
+      .should("have.value", 30);
+    cy.get("input[type=checkbox]").check({ force: true });
+    cy.get("#Add-Desc").type("Will cure your death");
+    cy.get("#Add-Brand")
+      .type("habesha")
+      .should("have.value", "habesha");
+    cy.get("#Add-Origin")
+      .type("eth")
+      .should("have.value", "eth");
+    cy.get("#Create-Btn").click();
+    cy.contains("This Drug Already Exists In Your Database");
+    cy.wait(2000);
+    cy.get("#Cancel-Btn").click();
+  });
+
   it("Delete drug", () => {
     cy.createDrug();
+    cy.wait(1000);
     cy.get("#Search-Input").type("new");
     cy.get(".card-title")
       .contains("new drug")
@@ -98,6 +154,7 @@ describe("Home page", () => {
       .get(".bi-trash")
       .first()
       .click();
+    cy.wait(1000);
     cy.contains("ARE YOU SURE?")
       .get("#Sure-Delet")
       .click();
@@ -128,8 +185,11 @@ describe("Home page", () => {
   it.only("Upload drugs excel", () => {
     cy.get("#upload-button").click();
     cy.wait(500);
-    cy.get("input[type=file]").selectFile("cypress/fixtures/example.json", {
-      force: true,
-    });
+    cy.get("input[type=file]").selectFile(
+      "cypress/fixtures/DrugInventoryForm.xlsx",
+      {
+        force: true,
+      }
+    );
   });
 });

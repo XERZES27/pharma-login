@@ -60,8 +60,5 @@ describe("Login page test", () => {
       .should("have.value", "dafdsfdD2%");
     cy.get("input[type=checkbox]").check();
     cy.get(".submitButton").click();
-    cy.get(".error").contains(
-      "This Email Is Not Attached To A Verified Account"
-    );
   });
 });

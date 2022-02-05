@@ -84,7 +84,7 @@ describe("Review Page", () => {
     cy.wait(1000);
     cy.get(".text-dark")
       .scrollIntoView()
-      .type("Response " + Math.floor(Math.random() * 100) + 1);
+      .type("Edited response " + Math.floor(Math.random() * 100) + 1);
     cy.wait(1000);
     cy.get("#Send-Btn")
       .scrollIntoView()

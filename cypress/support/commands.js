@@ -53,7 +53,7 @@ Cypress.Commands.add("deleteDrug", () => {
 
 Cypress.Commands.add("createDrug", () => {
   cy.get("#add-button").click();
-  cy.get(".show").contains("Add Drug");
+  cy.contains("Add Drug");
   cy.get("#Add-Drug-Input")
     .type("new drug")
     .should("have.value", "new drug");
